@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 class TrackingManager private constructor(
     private val context: Context,
     private val sleepRepository: SleepRepository,
-    private val notificationManager: TrackingNotificationManager
-) {
+    private val notificationManager: TrackingNotificationManager) {
+    val repository: SleepRepository get() = sleepRepository
     private val startTrackingUseCase = StartTrackingUseCase(sleepRepository)
     private val stopTrackingUseCase = StopTrackingUseCase(sleepRepository)
     private val cancelTrackingUseCase = CancelTrackingUseCase(sleepRepository)

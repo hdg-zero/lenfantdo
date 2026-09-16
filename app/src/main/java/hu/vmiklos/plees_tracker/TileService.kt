@@ -1,5 +1,6 @@
 /*
  * Copyright 2023 Miklos Vajna
+ * Copyright 2026 L'enfant do Contributors
  *
  * SPDX-License-Identifier: MIT
  */
@@ -13,11 +14,11 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.preference.PreferenceManager
+import fr.lenfantdo.tracking.TrackingManager
+import kotlinx.coroutines.runBlocking
 
 /**
- * Provides a quick settings tile that opens the main activity and immediately toggles between
- * started/stopped sleep tracking.
+ * Quick settings tile to toggle sleep tracking directly from system panel.
  */
 @RequiresApi(api = Build.VERSION_CODES.N)
 class TileService : android.service.quicksettings.TileService() {
@@ -31,32 +32,35 @@ class TileService : android.service.quicksettings.TileService() {
     }
 
     private fun refreshTile() {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        DataModel.init(applicationContext, preferences)
-
-        val active = DataModel.start != null && DataModel.stop == null
-
-        if (active) {
-            qsTile.state = Tile.STATE_ACTIVE
-        } else {
-            qsTile.state = Tile.STATE_INACTIVE
+        try {
+            val trackingManager = TrackingManager.getInstance(applicationContext)
+            runBlocking {
+                val active = trackingManager.getActiveTracking() != null
+                qsTile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+                qsTile.updateTile()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "refreshTile error", e)
         }
-        qsTile.updateTile()
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         try {
-            if (qsTile.state == Tile.STATE_ACTIVE) {
-                qsTile.state = Tile.STATE_INACTIVE
-            } else {
-                qsTile.state = Tile.STATE_ACTIVE
+            val trackingManager = TrackingManager.getInstance(applicationContext)
+            runBlocking {
+                val active = trackingManager.getActiveTracking()
+                if (active != null) {
+                    trackingManager.stop()
+                } else {
+                    trackingManager.start()
+                }
             }
-            qsTile.updateTile()
+            refreshTile()
 
-            val intent = Intent(applicationContext, MainActivity::class.java)
-            intent.putExtra("startStop", true)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val intent = Intent(applicationContext, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 val flags = PendingIntent.FLAG_IMMUTABLE
                 val activity = PendingIntent.getActivity(this, 0, intent, flags)
@@ -66,7 +70,7 @@ class TileService : android.service.quicksettings.TileService() {
                 startActivityAndCollapse(intent)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "onClick: uncaught exception: $e")
+            Log.e(TAG, "onClick error", e)
         }
     }
 

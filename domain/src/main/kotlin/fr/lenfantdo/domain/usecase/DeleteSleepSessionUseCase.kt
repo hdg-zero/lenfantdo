@@ -29,4 +29,6 @@ class DeleteSleepSessionUseCase(
             Result.failure(e)
         }
     }
+
+    suspend operator fun invoke(id: Long): Result<Unit> = byId(id)
 }

@@ -20,4 +20,26 @@ class RecordCompletedSleepUseCase(
             Result.failure(e)
         }
     }
+
+    suspend operator fun invoke(
+        startEpochMs: Long,
+        stopEpochMs: Long,
+        rating: Long? = null,
+        note: String = "",
+        wakeups: Int = 0
+    ): Result<Long> {
+        return try {
+            val session = SleepSession(
+                startEpochMs = startEpochMs,
+                stopEpochMs = stopEpochMs,
+                rating = rating,
+                note = note,
+                wakeups = wakeups
+            )
+            val id = sleepRepository.insertSession(session)
+            Result.success(id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
