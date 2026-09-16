@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 L'enfant do Contributors
+  SPDX-License-Identifier: MIT
+  Google Play Store Feature Graphic Banner (1024x500)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+  <defs>
+    <!-- Background Nocturnal Deep Sky Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070C1E"/>
+      <stop offset="35%" stop-color="#0B132B"/>
+      <stop offset="70%" stop-color="#141E3C"/>
+      <stop offset="100%" stop-color="#1E1B4B"/>
+    </linearGradient>
+
+    <!-- Ambient Sky Halo (Cyan / Sky Blue) -->
+    <radialGradient id="cyanAmbient" cx="15%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.18"/>
+      <stop offset="60%" stop-color="#0284C7" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#070C1E" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Moon Master Halo (Golden / Warm Amber) -->
+    <radialGradient id="moonAmbient" cx="72%" cy="45%" r="48%">
+      <stop offset="0%" stop-color="#FDE047" stop-opacity="0.22"/>
+      <stop offset="30%" stop-color="#F59E0B" stop-opacity="0.12"/>
+      <stop offset="65%" stop-color="#818CF8" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0B132B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Radiant Golden Moon Gradient -->
+    <linearGradient id="moonGrad" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="25%" stop-color="#FEF08A"/>
+      <stop offset="65%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- Moon Inner Sheen / Depth -->
+    <linearGradient id="moonShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#B45309" stop-opacity="0.32"/>
+    </linearGradient>
+
+    <!-- Celestial Star Gradient -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFFBEB"/>
+      <stop offset="100%" stop-color="#FDE047"/>
+    </linearGradient>
+
+    <!-- Dream Cloud / Cradle Wave Gradient -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#818CF8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0.10"/>
+    </linearGradient>
+
+    <!-- Glassmorphism Card Gradient -->
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+    </linearGradient>
+
+    <!-- Drop Shadow Filter for Text & Moon -->
+    <filter id="shadowGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="moonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- 1. Background Fill -->
+  <rect width="1024" height="500" fill="url(#bgGrad)"/>
+  <rect width="1024" height="500" fill="url(#cyanAmbient)"/>
+  <rect width="1024" height="500" fill="url(#moonAmbient)"/>
+
+  <!-- 2. Starfield (Scattered nocturnal micro-stars) -->
+  <g fill="#FFFFFF">
+    <circle cx="68" cy="74" r="1.5" opacity="0.65"/>
+    <circle cx="142" cy="118" r="1.2" opacity="0.45"/>
+    <circle cx="95" cy="180" r="1.8" opacity="0.55"/>
+    <circle cx="215" cy="65" r="1.0" opacity="0.40"/>
+    <circle cx="280" cy="120" r="1.5" opacity="0.70"/>
+    <circle cx="340" cy="50" r="1.2" opacity="0.50"/>
+    <circle cx="410" cy="95" r="1.6" opacity="0.60"/>
+    <circle cx="485" cy="40" r="1.2" opacity="0.35"/>
+    <circle cx="510" cy="140" r="1.5" opacity="0.50"/>
+    <circle cx="580" cy="75" r="1.8" opacity="0.75"/>
+    <circle cx="630" cy="45" r="1.1" opacity="0.40"/>
+    <circle cx="690" cy="110" r="1.4" opacity="0.60"/>
+    <circle cx="770" cy="55" r="1.6" opacity="0.50"/>
+    <circle cx="850" cy="85" r="1.2" opacity="0.45"/>
+    <circle cx="930" cy="60" r="1.7" opacity="0.70"/>
+    <circle cx="975" cy="130" r="1.3" opacity="0.55"/>
+    <circle cx="80" cy="420" r="1.2" opacity="0.40"/>
+    <circle cx="190" cy="445" r="1.5" opacity="0.50"/>
+    <circle cx="310" cy="460" r="1.1" opacity="0.35"/>
+    <circle cx="450" cy="430" r="1.4" opacity="0.45"/>
+    <circle cx="960" cy="420" r="1.5" opacity="0.60"/>
+    <circle cx="890" cy="460" r="1.2" opacity="0.40"/>
+  </g>
+
+  <!-- 3. Flowing Cradle Slumber Waves (Organic curved horizon) -->
+  <path d="M 460,500 C 560,420 660,460 760,410 C 860,360 940,430 1024,390 L 1024,500 Z" fill="url(#waveGrad)"/>
+  <path d="M 0,500 L 0,460 C 120,440 240,480 380,450 C 480,430 560,470 660,450 L 660,500 Z" fill="#38BDF8" opacity="0.05"/>
+
+  <!-- 4. Celestial Moon Artwork (Right Wing) -->
+  <g transform="translate(470, 0)">
+    <!-- Ambient Halo Glow behind moon -->
+    <circle cx="260" cy="235" r="175" fill="#38BDF8" opacity="0.12"/>
+    <circle cx="260" cy="235" r="130" fill="#FBBF24" opacity="0.14"/>
+
+    <!-- Crescent Moon -->
+    <path d="M 266,105 A 130 130 0 1 0 338 330 A 118 118 0 1 1 266 105 Z"
+          fill="url(#moonGrad)" filter="url(#shadowGlow)"/>
+
+    <!-- Moon Inner Depth Sheen -->
+    <path d="M 266,105 A 130 130 0 0 0 136 234 A 130 130 0 0 0 152 291 C 165,210 210,148 266,105 Z"
+          fill="url(#moonShade)"/>
+
+    <!-- Radiant Primary Celestial Star -->
+    <g transform="translate(320, 170)">
+      <path d="M 0,-34 Q 0,0 34,0 Q 0,0 0,34 Q 0,0 -34,0 Q 0,0 0,-34 Z" fill="url(#starGrad)" filter="url(#moonGlow)"/>
+      <circle cx="0" cy="0" r="4.5" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Radiant Companion Star 1 -->
+    <g transform="translate(375, 105)">
+      <path d="M 0,-18 Q 0,0 18,0 Q 0,0 0,18 Q 0,0 -18,0 Q 0,0 0,-18 Z" fill="url(#starGrad)"/>
+      <circle cx="0" cy="0" r="2.8" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Radiant Companion Star 2 -->
+    <g transform="translate(365, 275)">
+      <path d="M 0,-15 Q 0,0 15,0 Q 0,0 0,15 Q 0,0 -15,0 Q 0,0 0,-15 Z" fill="url(#starGrad)"/>
+      <circle cx="0" cy="0" r="2.2" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Micro Twinkle Star -->
+    <g transform="translate(140, 130)">
+      <path d="M 0,-10 Q 0,0 10,0 Q 0,0 0,10 Q 0,0 -10,0 Q 0,0 0,-10 Z" fill="url(#starGrad)" opacity="0.85"/>
+      <circle cx="0" cy="0" r="1.5" fill="#FFFFFF"/>
+    </g>
+  </g>
+
+  <!-- 5. Left Branding Content (Safe Zone: x=75..520, y=80..420) -->
+  <g transform="translate(75, 0)">
+    <!-- Small Category / Privacy Kicker -->
+    <g transform="translate(0, 108)">
+      <rect width="180" height="28" rx="14" fill="#38BDF8" fill-opacity="0.12" stroke="#38BDF8" stroke-opacity="0.30" stroke-width="1"/>
+      <text x="14" y="18" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="12" font-weight="600" fill="#38BDF8" letter-spacing="0.5">✦ 100% HORS LIGNE</text>
+    </g>
+
+    <!-- Main App Title -->
+    <text x="0" y="195" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="62" font-weight="800" fill="#FFFFFF" letter-spacing="-1.5" filter="url(#shadowGlow)">L'enfant do</text>
+
+    <!-- Golden Celestial Dot on the title -->
+    <circle cx="340" cy="155" r="5" fill="#FBBF24"/>
+
+    <!-- Tagline -->
+    <text x="0" y="242" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="22" font-weight="500" fill="#E2E8F0" letter-spacing="-0.2">Journal de sommeil privé, assisté et sans réseau</text>
+
+    <!-- Subtitle / Value proposition -->
+    <text x="0" y="280" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="15" font-weight="400" fill="#94A3B8" letter-spacing="0.2">Vos nuits protégées sur votre appareil • Zéro traceur • Zéro service permanent</text>
+
+    <!-- 6. Feature Badges (Glassmorphism Pill Row) -->
+    <g transform="translate(0, 332)">
+      <!-- Pill 1: Zéro Réseau -->
+      <g transform="translate(0, 0)">
+        <rect width="138" height="42" rx="21" fill="url(#glassGrad)" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="1"/>
+        <text x="18" y="26" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="13" font-weight="600" fill="#F1F5F9">🛡️ Zéro Réseau</text>
+      </g>
+
+      <!-- Pill 2: Chiffrement AES -->
+      <g transform="translate(150, 0)">
+        <rect width="170" height="42" rx="21" fill="url(#glassGrad)" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="1"/>
+        <text x="18" y="26" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="13" font-weight="600" fill="#F1F5F9">🔒 AES-256 local</text>
+      </g>
+
+      <!-- Pill 3: Sobriété Batterie -->
+      <g transform="translate(332, 0)">
+        <rect width="168" height="42" rx="21" fill="url(#glassGrad)" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="1"/>
+        <text x="18" y="26" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="13" font-weight="600" fill="#F1F5F9">🔋 Zéro WakeLock</text>
+      </g>
+    </g>
+
+    <!-- Footer Meta: Open Source & Fork Plees Tracker -->
+    <text x="2" y="420" font-family="'Geist', 'Inter', 'Roboto', 'DejaVu Sans', sans-serif" font-size="12" font-weight="400" fill="#64748B" letter-spacing="0.3">Open-source • Licence MIT • Architecture Jetpack Compose &amp; Room</text>
+  </g>
+</svg>
