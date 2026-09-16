@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "lenfantdo"
 include(":app")
 include(":domain")
+include(":data")
