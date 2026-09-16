@@ -44,4 +44,13 @@ With strictly zero network permissions, no trackers, and no advertising, L'enfan
 ✓ Open-source, transparent, and audited (MIT License)
 ✓ Lightweight, fast, and optimized
 
+━━━━━━━━━━━━━━━━━━━━━
+📜 CREDITS & OPEN-SOURCE
+━━━━━━━━━━━━━━━━━━━━━
+L'enfant do is free and open-source software under the MIT License.
+It is a modern fork of Plees Tracker, originally created by Miklos Vajna.
+
+• L'enfant do repository: https://github.com/hdg-zero/lenfantdo
+• Upstream Plees Tracker repository: https://github.com/vmiklos/plees-tracker
+
 Rediscover peaceful nights with a sleep journal that truly respects your privacy.

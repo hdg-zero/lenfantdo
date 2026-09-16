@@ -45,4 +45,13 @@ Sans aucun accès Internet, sans traqueurs et sans publicité, L'enfant do vous 
 ✓ Code source ouvert, transparent et audité (Licence MIT)
 ✓ Léger, rapide et ultra-optimisé
 
+━━━━━━━━━━━━━━━━━━━━━
+📜 CRÉDITS & OPEN-SOURCE
+━━━━━━━━━━━━━━━━━━━━━
+L'enfant do est un logiciel libre et open source distribué sous licence MIT.
+Il s'agit d'un fork moderne de Plees Tracker, initié par Miklos Vajna.
+
+• Dépôt GitHub L'enfant do : https://github.com/hdg-zero/lenfantdo
+• Projet d'origine (Plees Tracker) : https://github.com/vmiklos/plees-tracker
+
 Retrouvez un sommeil serein avec un compagnon respectueux de vos nuits et de votre vie privée.
