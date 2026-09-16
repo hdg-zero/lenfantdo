@@ -5,15 +5,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-package hu.vmiklos.plees_tracker
+package fr.lenfantdo.platform
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.util.Log
 import androidx.annotation.RequiresApi
+import fr.lenfantdo.MainActivity
 import fr.lenfantdo.tracking.TrackingManager
 import kotlinx.coroutines.runBlocking
 
@@ -58,19 +58,23 @@ class TileService : android.service.quicksettings.TileService() {
             }
             refreshTile()
 
-            val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            val intent = Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                val flags = PendingIntent.FLAG_IMMUTABLE
-                val activity = PendingIntent.getActivity(this, 0, intent, flags)
-                startActivityAndCollapse(activity)
+                val pendingIntent = android.app.PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+                )
+                startActivityAndCollapse(pendingIntent)
             } else {
                 @Suppress("DEPRECATION")
                 startActivityAndCollapse(intent)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "onClick error", e)
+            Log.e(TAG, "Tile onClick error", e)
         }
     }
 

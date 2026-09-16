@@ -13,8 +13,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import hu.vmiklos.plees_tracker.MainActivity
-import hu.vmiklos.plees_tracker.R
+import fr.lenfantdo.MainActivity
+import fr.lenfantdo.R
 
 class TrackingNotificationManager(
     private val context: Context

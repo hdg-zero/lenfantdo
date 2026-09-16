@@ -1,10 +1,11 @@
 /*
  * Copyright 2023 Miklos Vajna
+ * Copyright 2026 L'enfant do Contributors
  *
  * SPDX-License-Identifier: MIT
  */
 
-package hu.vmiklos.plees_tracker
+package fr.lenfantdo.platform
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -13,9 +14,11 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
+import fr.lenfantdo.MainActivity
+import fr.lenfantdo.R
 
 /**
- * Provides a widget that opens the main activity and immediately toggles between started/stopped
+ * Provides a home screen widget that opens MainActivity and toggles between started/stopped
  * sleep tracking.
  */
 class ToggleWidget : AppWidgetProvider() {
@@ -25,25 +28,16 @@ class ToggleWidget : AppWidgetProvider() {
         appWidgetIds: IntArray?
     ) {
         Log.d(TAG, "ToggleWidget.onUpdate")
-        if (context == null) {
-            return
-        }
-
-        if (appWidgetManager == null) {
-            return
-        }
-
-        if (appWidgetIds == null) {
+        if (context == null || appWidgetManager == null || appWidgetIds == null) {
             return
         }
 
         for (appWidgetId in appWidgetIds) {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra("startStop", true)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            var flags = PendingIntent.FLAG_UPDATE_CURRENT
-            // Needed for Android 12+
-            flags = flags or PendingIntent.FLAG_IMMUTABLE
+            val intent = Intent(context, MainActivity::class.java).apply {
+                putExtra("startStop", true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             val pendingIntent = PendingIntent.getActivity(
                 context, 0, intent, flags
             )
@@ -57,5 +51,3 @@ class ToggleWidget : AppWidgetProvider() {
         private const val TAG = "ToggleWidget"
     }
 }
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-package hu.vmiklos.plees_tracker
+package fr.lenfantdo
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -15,19 +16,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import fr.lenfantdo.tracking.TrackingManager
 import fr.lenfantdo.ui.LenfantdoApp
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ ->
-        // Permission result handled
-    }
+    ) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        handleStartStopIntent(intent)
 
         // Ensure active tracking notification is restored if tracking was ongoing
         TrackingManager.getInstance(applicationContext).restoreNotificationIfActive()
@@ -45,6 +48,27 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LenfantdoApp()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleStartStopIntent(intent)
+    }
+
+    private fun handleStartStopIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra("startStop", false) == true) {
+            intent.removeExtra("startStop")
+            lifecycleScope.launch {
+                val trackingManager = TrackingManager.getInstance(applicationContext)
+                val active = trackingManager.getActiveTracking()
+                if (active != null) {
+                    trackingManager.stop()
+                } else {
+                    trackingManager.start()
+                }
+            }
         }
     }
 

@@ -1,0 +1,30 @@
+# Baseline Profile for L'enfant do
+# Pre-compiles startup classes, tracking logic, room database and compose theme/screens
+
+Lfr/lenfantdo/MainActivity;
+HSPLfr/lenfantdo/MainActivity;-><init>()V
+HSPLfr/lenfantdo/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLfr/lenfantdo/MainActivity;->onResume()V
+
+Lfr/lenfantdo/tracking/TrackingManager;
+HSPLfr/lenfantdo/tracking/TrackingManager;->getInstance(Landroid/content/Context;)Lfr/lenfantdo/tracking/TrackingManager;
+HSPLfr/lenfantdo/tracking/TrackingManager;->getActiveTracking()Lfr/lenfantdo/domain/model/ActiveTracking;
+HSPLfr/lenfantdo/tracking/TrackingManager;->restoreNotificationIfActive()V
+
+Lfr/lenfantdo/tracking/TrackingNotificationManager;
+HSPLfr/lenfantdo/tracking/TrackingNotificationManager;-><init>(Landroid/content/Context;)V
+
+Lfr/lenfantdo/data/local/AppDatabase;
+HSPLfr/lenfantdo/data/local/AppDatabase;->build(Landroid/content/Context;Z)Lfr/lenfantdo/data/local/AppDatabase;
+
+Lfr/lenfantdo/ui/LenfantdoAppKt;
+HSPLfr/lenfantdo/ui/LenfantdoAppKt;->LenfantdoApp(Landroidx/compose/runtime/Composer;I)V
+
+Lfr/lenfantdo/ui/theme/ThemeKt;
+HSPLfr/lenfantdo/ui/theme/ThemeKt;->LenfantdoTheme(ZZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+
+Lfr/lenfantdo/feature/home/HomeScreenKt;
+HSPLfr/lenfantdo/feature/home/HomeScreenKt;->HomeScreen(Lfr/lenfantdo/feature/home/HomeViewModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+
+Lfr/lenfantdo/feature/home/HomeViewModel;
+HSPLfr/lenfantdo/feature/home/HomeViewModel;-><init>(Lfr/lenfantdo/domain/repository/SleepRepository;)V

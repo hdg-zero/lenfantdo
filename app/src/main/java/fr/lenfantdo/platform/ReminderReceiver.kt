@@ -1,10 +1,11 @@
 /*
  * Copyright 2025 Miklos Vajna
+ * Copyright 2026 L'enfant do Contributors
  *
  * SPDX-License-Identifier: MIT
  */
 
-package hu.vmiklos.plees_tracker
+package fr.lenfantdo.platform
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import fr.lenfantdo.R
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -52,5 +54,3 @@ class ReminderReceiver : BroadcastReceiver() {
         notificationManager.notify(reminderType.hashCode(), notification)
     }
 }
-
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

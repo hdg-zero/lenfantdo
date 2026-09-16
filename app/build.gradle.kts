@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "hu.vmiklos.plees_tracker"
+    namespace = "fr.lenfantdo"
     compileSdk {
         version = release(37)
     }
@@ -49,7 +49,6 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
