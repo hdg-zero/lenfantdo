@@ -1,24 +1,32 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ProGuard / R8 optimization and obfuscation rules for L'enfant do
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Preserve Kotlin Reflection and Attributes for stacktraces
+-keepattributes SourceFile,LineNumberTable
+-keepattributes *Annotation*,InnerClasses,EnclosingMethod
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Room Database
+-keep class androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao interface * { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# DataStore Preferences
+-keep class androidx.datastore.** { *; }
+
+# Kotlin Coroutines
+-dontwarn kotlinx.coroutines.**
+-keepclassmembers class kotlinx.coroutines.** {
+    volatile <fields>;
+}
+
+# Domain Models
+-keep class fr.lenfantdo.domain.model.** { *; }
+-keep class fr.lenfantdo.domain.analytics.** { *; }
+
+# Jetpack Compose and Material 3
+-keep class androidx.compose.material3.** { *; }
+-dontwarn androidx.compose.**
 
 # AboutLibraries
 -keep class .R

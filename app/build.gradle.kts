@@ -89,7 +89,6 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.commons.csv)
     implementation(libs.aboutlibraries)
-    implementation(libs.mpandroidchart)
     implementation(libs.javax.annotation.api)
 
     // Compose

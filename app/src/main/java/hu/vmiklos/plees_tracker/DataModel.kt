@@ -94,8 +94,6 @@ object DataModel {
 
     lateinit var preferences: SharedPreferences
 
-    var preferencesActivity: PreferencesActivity? = null
-
     var start: Date? = null
         set(start) {
             field = start
@@ -731,7 +729,7 @@ object DataModel {
     fun handleWindowInsets(activity: AppCompatActivity) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             // Handle edge-to-edge mode
-            val rootView = activity.findViewById<View>(R.id.root)
+            val rootView = activity.findViewById<View>(android.R.id.content)
             ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
                 val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
                 view.setPadding(sysBars.left, sysBars.top, sysBars.right, sysBars.bottom)
