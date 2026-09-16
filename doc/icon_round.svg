@@ -6,21 +6,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <!-- Nocturnal Sky Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bgGradRound" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0B132B"/>
       <stop offset="45%" stop-color="#1C2541"/>
       <stop offset="100%" stop-color="#1E1B4B"/>
     </linearGradient>
 
     <!-- Celestial Ambient Glow -->
-    <radialGradient id="haloGrad" cx="50%" cy="50%" r="50%">
+    <radialGradient id="haloGradRound" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.28"/>
       <stop offset="45%" stop-color="#818CF8" stop-opacity="0.14"/>
       <stop offset="100%" stop-color="#0B132B" stop-opacity="0"/>
     </radialGradient>
 
     <!-- Radiant Golden Moon Gradient -->
-    <linearGradient id="moonGrad" x1="15%" y1="10%" x2="85%" y2="90%">
+    <linearGradient id="moonGradRound" x1="15%" y1="10%" x2="85%" y2="90%">
       <stop offset="0%" stop-color="#FFFFFF"/>
       <stop offset="25%" stop-color="#FEF08A"/>
       <stop offset="65%" stop-color="#FBBF24"/>
@@ -28,54 +28,54 @@
     </linearGradient>
 
     <!-- Moon Inner Sheen / Depth -->
-    <linearGradient id="moonShade" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="moonShadeRound" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
       <stop offset="100%" stop-color="#B45309" stop-opacity="0.30"/>
     </linearGradient>
 
     <!-- Celestial Star Gradient -->
-    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="starGradRound" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
       <stop offset="50%" stop-color="#FFFBEB"/>
       <stop offset="100%" stop-color="#FDE047"/>
     </linearGradient>
 
     <!-- Dream Cloud / Slumber Wave Gradient -->
-    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="waveGradRound" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.30"/>
       <stop offset="100%" stop-color="#A78BFA" stop-opacity="0.15"/>
     </linearGradient>
   </defs>
 
-  <!-- Squircle Base Frame -->
-  <rect width="512" height="512" rx="115" ry="115" fill="url(#bgGrad)"/>
+  <!-- Circular Base Frame -->
+  <circle cx="256" cy="256" r="256" fill="url(#bgGradRound)"/>
 
   <!-- Soft Ambient Glow -->
-  <circle cx="256" cy="256" r="195" fill="url(#haloGrad)"/>
+  <circle cx="256" cy="256" r="195" fill="url(#haloGradRound)"/>
 
   <!-- Dream Cloud / Cradle Wave at base -->
   <path d="M 125,375 C 165,345 205,375 255,355 C 305,335 345,365 395,345 C 385,380 340,405 285,405 C 215,405 160,395 125,375 Z"
-        fill="url(#waveGrad)"/>
+        fill="url(#waveGradRound)"/>
 
   <!-- Crescent Moon -->
   <path d="M 262.5,112.1 A 145 145 0 1 0 342.8 363.0 A 132 132 0 1 1 262.5 112.1 Z"
-        fill="url(#moonGrad)"/>
+        fill="url(#moonGradRound)"/>
 
   <!-- Moon Subtle Inner Sheen -->
   <path d="M 262.5,112.1 A 145 145 0 0 0 117.5 256.0 A 145 145 0 0 0 135.0 320.0 C 150,230 200,160 262.5,112.1 Z"
-        fill="url(#moonShade)"/>
+        fill="url(#moonShadeRound)"/>
 
   <!-- Primary Radiant Celestial Star -->
   <path d="M 320,185 Q 320,225 360,225 Q 320,225 320,265 Q 320,225 280,225 Q 320,225 320,185 Z"
-        fill="url(#starGrad)"/>
+        fill="url(#starGradRound)"/>
   <circle cx="320" cy="225" r="4.5" fill="#FFFFFF"/>
 
   <!-- Secondary Companion Star -->
   <path d="M 378,145 Q 378,162 395,162 Q 378,162 378,179 Q 378,162 361,162 Q 378,162 378,145 Z"
-        fill="url(#starGrad)"/>
+        fill="url(#starGradRound)"/>
   <circle cx="378" cy="162" r="2.5" fill="#FFFFFF"/>
 
   <!-- Tertiary Micro Twinkle -->
   <path d="M 368,295 Q 368,304 377,304 Q 368,304 368,313 Q 368,304 359,304 Q 368,304 368,295 Z"
-        fill="url(#starGrad)"/>
+        fill="url(#starGradRound)"/>
 </svg>
