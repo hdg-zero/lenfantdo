@@ -93,6 +93,6 @@
 
 Ce logiciel est distribué sous licence **MIT**.
 - Copyright (c) 2020-2023 Miklos Vajna et les contributeurs de Plees Tracker.
-- Copyright (c) 2026 Les contributeurs de L'enfant do.
+- Copyright (c) 2026 hdg-zero et les contributeurs de L'enfant do.
 
 Consultez le fichier [LICENSE](LICENSE) pour les termes complets.
