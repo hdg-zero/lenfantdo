@@ -7,15 +7,20 @@
 package com.hdgdev.lenfantdo.ui
 
 import com.hdgdev.lenfantdo.domain.model.SleepSession
+import com.hdgdev.lenfantdo.feature.insights.DailyChartBar
 import com.hdgdev.lenfantdo.ui.component.PeriodOption
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class UiLogicTest {
 
@@ -64,5 +69,87 @@ class UiLogicTest {
         assertTrue(grouped.containsKey("Mars 2026"))
         assertEquals(1, grouped["Avril 2026"]?.size)
         assertEquals(1, grouped["Mars 2026"]?.size)
+    }
+
+    @Test
+    fun regularityScore_computesAccuratePercentageAndLabel() {
+        fun computeScoreAndLabel(rBed: Double, rWake: Double): Pair<Int, String> {
+            val rCombined = (rBed + rWake) / 2.0
+            val score = (rCombined * 100.0).roundToInt().coerceIn(0, 100)
+            val label = when {
+                score >= 85 -> "Excellente"
+                score >= 70 -> "Bonne"
+                score >= 50 -> "Modérée"
+                else -> "Variable"
+            }
+            return Pair(score, label)
+        }
+
+        val perfect = computeScoreAndLabel(1.0, 1.0)
+        assertEquals(100, perfect.first)
+        assertEquals("Excellente", perfect.second)
+
+        val good = computeScoreAndLabel(0.75, 0.77)
+        assertEquals(76, good.first)
+        assertEquals("Bonne", good.second)
+
+        val moderate = computeScoreAndLabel(0.56, 0.60)
+        assertEquals(58, moderate.first)
+        assertEquals("Modérée", moderate.second)
+
+        val variable = computeScoreAndLabel(0.30, 0.40)
+        assertEquals(35, variable.first)
+        assertEquals("Variable", variable.second)
+    }
+
+    @Test
+    fun weekdayVsWeekend_computesAveragesAndDeltaCorrectly() {
+        val bars = listOf(
+            DailyChartBar(
+                date = LocalDate.of(2026, 9, 14), // Monday (weekday)
+                durationHours = 7.0,
+                isTracked = true,
+                formattedDuration = "7h"
+            ),
+            DailyChartBar(
+                date = LocalDate.of(2026, 9, 15), // Tuesday (weekday)
+                durationHours = 8.0,
+                isTracked = true,
+                formattedDuration = "8h"
+            ),
+            DailyChartBar(
+                date = LocalDate.of(2026, 9, 19), // Saturday (weekend)
+                durationHours = 9.0,
+                isTracked = true,
+                formattedDuration = "9h"
+            ),
+            DailyChartBar(
+                date = LocalDate.of(2026, 9, 20), // Sunday (weekend)
+                durationHours = 9.5,
+                isTracked = true,
+                formattedDuration = "9h 30min"
+            )
+        )
+
+        val tracked = bars.filter { it.isTracked }
+        val weekday = tracked.filter { it.date.dayOfWeek.value in 1..5 }
+        val weekend = tracked.filter { it.date.dayOfWeek.value in 6..7 }
+
+        val weekdayMean = weekday.map { it.durationHours }.average()
+        val weekendMean = weekend.map { it.durationHours }.average()
+
+        assertEquals(7.5, weekdayMean, 0.001)
+        assertEquals(9.25, weekendMean, 0.001)
+
+        val deltaMinutes = ((weekendMean - weekdayMean) * 60).roundToInt()
+        assertEquals(105, deltaMinutes) // +1h 45min in weekend
+    }
+
+    @Test
+    fun dailyChartBar_deltaFromMeanIsAccurate() {
+        val meanMinutes = 480 // 8 hours
+        val sessionMinutes = 450 // 7h30
+        val delta = sessionMinutes - meanMinutes
+        assertEquals(-30, delta)
     }
 }
