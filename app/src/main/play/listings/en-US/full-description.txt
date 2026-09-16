@@ -1,13 +1,47 @@
-Plees Tracker is a simple sleep tracker for your Android phone.
+🌙 L'enfant do — Your private, 100% offline sleep journal.
 
-This is meant to be a very simple open source clone of PrimeNap, i.e. just track sleep start/stop times and count the average / day.
+Take control of your rest in total serenity. L'enfant do is a sleep tracker built around a simple, uncompromised promise: your health data and sleep routines belong to you and only you.
 
-Features:
+With strictly zero network permissions, no trackers, and no advertising, L'enfant do provides precise, scientific, and respectful insights into your sleep habits.
 
-- It literally does nothing while you sleep, causes no battery drain.
+━━━━━━━━━━━━━━━━━━━━━
+✨ KEY FEATURES
+━━━━━━━━━━━━━━━━━━━━━
 
-- Stores past sleeps, counts stat from them (average).
+🛡️ 100% Offline & Total Privacy
+• Zero network permissions: the app cannot connect to the internet, by design.
+• All data is stored exclusively on your device.
+• No account creation, no sign-up, no hidden telemetry.
 
-- Exports/imports sleep data to/from CSV.
+🔋 Battery Friendly & Zero Night Drain
+• No heavy persistent background services draining your battery while you rest.
+• Atomic timestamping when you fall asleep and wake up.
+• Minimalist system chronometer notification and Quick Settings tile to track with a single tap.
 
-- Can show past sleeps, can selectively edit and delete individual sleeps.
+📊 Mathematically Sound Sleep Analytics
+• Circular time mean: eliminates the "midnight trap" where averaging 11:50 PM and 12:10 AM produces noon. Your bedtime and wake-up averages are genuinely accurate.
+• Welford variance algorithm for stable sleep regularity and duration tracking.
+• Interactive trends and graphs (7d, 14d, 30d, 1y) with smooth monthly aggregation.
+• Explicit night coverage rate so missed logs never distort your averages.
+
+🔒 Local Backups & Data Sovereignty
+• End-to-end encrypted backup (.enc): secure your sleep history with a password using AES-256-GCM and PBKDF2 key derivation.
+• Universal CSV import and export: fully compatible with spreadsheets and legacy Plees Tracker backups.
+• Automatic safety snapshots before any restore operation.
+
+🎨 Modern, Soothing & Accessible UI
+• Built with Jetpack Compose & Material 3 with a gentle glassmorphism night theme to preserve night vision.
+• Optional compact card view for high-density journal browsing.
+• Dynamic theming (Dark, Light, System).
+• Full TalkBack accessibility support with semantic text tables alongside charts.
+
+━━━━━━━━━━━━━━━━━━━━━
+📋 AT A GLANCE
+━━━━━━━━━━━━━━━━━━━━━
+✓ Zero network permissions (INTERNET / ACCESS_NETWORK_STATE)
+✓ Zero WakeLock or permanent background service
+✓ Zero ads, zero tracking, zero subscriptions
+✓ Open-source, transparent, and audited (MIT License)
+✓ Lightweight, fast, and optimized
+
+Rediscover peaceful nights with a sleep journal that truly respects your privacy.

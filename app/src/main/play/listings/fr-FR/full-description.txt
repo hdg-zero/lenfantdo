@@ -1,0 +1,48 @@
+🌙 L'enfant do — Votre journal de sommeil privé, assisté et 100% hors ligne.
+
+Prenez soin de votre sommeil en toute sérénité. L'enfant do est une application de suivi du sommeil conçue autour d'un principe fondamental : vos données de santé et vos habitudes de repos vous appartiennent exclusivement.
+
+Sans aucun accès Internet, sans traqueurs et sans publicité, L'enfant do vous offre un suivi précis, scientifique et reposant de vos nuits et de vos siestes.
+
+━━━━━━━━━━━━━━━━━━━━━
+✨ POURQUOI CHOISIR L'ENFANT DO ?
+━━━━━━━━━━━━━━━━━━━━━
+
+🛡️ 100% Hors Ligne & Confidentialité Absolue
+• Aucune permission Internet : l'application ne peut techniquement rien envoyer sur le réseau.
+• Vos données restent exclusivement stockées sur la mémoire locale de votre téléphone.
+• Aucun compte requis, aucune inscription, aucun analytics caché.
+
+🔋 Sobriété Énergétique & Zéro Décharge Nocturne
+• Pas de service d'arrière-plan permanent (« Foreground Service ») qui tourne toute la nuit et décharge votre batterie.
+• Horodatage atomique et précis de l'endormissement et du réveil.
+• Notification discrète avec chronomètre système et bouton rapide pour enregistrer votre nuit dès le réveil.
+
+📊 Statistiques Ciblées & Mathématiquement Exactes
+• Moyenne circulaire des horaires : résout le fameux « piège de minuit » où une moyenne classique entre 23h50 et 00h10 donnerait midi. Vos heures de coucher et de réveil moyennes sont parfaitement calculées.
+• Algorithme de Welford pour une régularité de sommeil stable et un écart-type fiable.
+• Graphiques interactifs de tendances (7 jours, 14 jours, 30 jours, 1 an) avec agrégation mensuelle fluide.
+• Calcul intelligent du taux de couverture des nuits pour ne pas fausser vos statistiques.
+
+🔒 Sauvegardes Locales & Souveraineté des Données
+• Sauvegarde chiffrée de bout en bout (.enc) : protégez vos archives avec un mot de passe fort grâce au chiffrement AES-256-GCM et à la dérivation PBKDF2.
+• Import / Export CSV universel : compatible avec vos tableurs et rétrocompatible avec Plees Tracker.
+• Instantanés de sécurité automatiques créés avant chaque restauration pour prévenir toute perte accidentelle.
+
+🎨 Interface Moderne, Douce et Accessible
+• Design apaisant en Jetpack Compose et Material 3 avec effet Glassmorphism conçu pour préserver vos yeux dans l'obscurité.
+• Mode compact personnalisable pour afficher plus de nuits en un clin d'œil.
+• Thème dynamique (Sombre, Clair ou Système).
+• Tuile de réglages rapides (Quick Settings) pour lancer ou arrêter le suivi en un geste sans déverrouiller complètement le téléphone.
+• Pleine accessibilité TalkBack avec équivalents textuels pour chaque graphique.
+
+━━━━━━━━━━━━━━━━━━━━━
+📋 EN RÉSUMÉ
+━━━━━━━━━━━━━━━━━━━━━
+✓ Zéro permission réseau (INTERNET / ACCESS_NETWORK_STATE)
+✓ Zéro permission WakeLock ou service permanent
+✓ Zéro publicité, zéro télémétrie, zéro modèle freemium
+✓ Code source ouvert, transparent et audité (Licence MIT)
+✓ Léger, rapide et ultra-optimisé
+
+Retrouvez un sommeil serein avec un compagnon respectueux de vos nuits et de votre vie privée.
