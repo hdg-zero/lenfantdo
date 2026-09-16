@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,12 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -59,13 +57,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hdgdev.lenfantdo.ui.component.glassBorderBrush
+import com.hdgdev.lenfantdo.ui.component.glassGradient
 import com.hdgdev.lenfantdo.ui.theme.WarmAmberTertiary
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.math.roundToInt
 
 @Composable
 fun ModernSleepBarChart(
@@ -75,14 +73,11 @@ fun ModernSleepBarChart(
 ) {
     if (bars.isEmpty()) return
 
-    // Selected bar index for interactive inspection
     var selectedIndex by remember(bars) {
-        // Default to the last tracked day, or last day
         val lastTrackedIndex = bars.indexOfLast { it.isTracked }
         mutableStateOf(if (lastTrackedIndex >= 0) lastTrackedIndex else bars.lastIndex)
     }
 
-    // Animation progress for smooth entry and period changes
     val animProgress = remember(bars) { Animatable(0f) }
     LaunchedEffect(bars) {
         animProgress.snapTo(0f)
@@ -93,70 +88,63 @@ fun ModernSleepBarChart(
     }
 
     val selectedBar = bars.getOrNull(selectedIndex)
+    val cardShape = RoundedCornerShape(24.dp)
 
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        modifier = modifier.fillMaxWidth()
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(glassGradient())
+            .border(1.dp, glassBorderBrush(), cardShape)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header
+            // Header: concise title + 8h target glass pill
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = "Rythme quotidien de sommeil",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Touchez une barre pour examiner les détails",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = "Sommeil par nuit",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                // Mini legend / indicator for 8h target
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(start = 8.dp)
+                // Compact glass pill for 8h target
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
+                                .size(7.dp)
                                 .background(WarmAmberTertiary, CircleShape)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = "Obj. 8h",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Interactive Day Inspector Card
+            // Glassmorphic Day Inspection Pill
             AnimatedContent(
                 targetState = selectedBar,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180))
+                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(150))
                 },
                 label = "bar_inspection_card"
             ) { bar ->
@@ -168,25 +156,22 @@ fun ModernSleepBarChart(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Chart Canvas
             val primaryColor = MaterialTheme.colorScheme.primary
             val tertiaryColor = MaterialTheme.colorScheme.tertiary
-            val selectedGlowColor = MaterialTheme.colorScheme.primary
-            val surfaceColor = MaterialTheme.colorScheme.surface
-            val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-            val trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+            val trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
             val amberColor = WarmAmberTertiary
             val maxHours = 12f
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(170.dp)
                     .semantics {
-                        contentDescription = "Graphique interactif des durées quotidiennes de sommeil. " +
-                                (selectedBar?.let { "Jour sélectionné : ${it.date}, durée : ${it.formattedDuration}" } ?: "")
+                        contentDescription = "Graphique des durées de sommeil. " +
+                                (selectedBar?.let { "${it.date} : ${it.formattedDuration}" } ?: "")
                     }
                     .pointerInput(bars) {
                         detectTapGestures { offset ->
@@ -206,12 +191,12 @@ fun ModernSleepBarChart(
 
                     // 8 Hours Reference line (dashed amber)
                     val y8h = canvasHeight * (1f - (8f / maxHours))
-                    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
+                    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
                     drawLine(
-                        color = amberColor.copy(alpha = 0.5f),
+                        color = amberColor.copy(alpha = 0.45f),
                         start = Offset(0f, y8h),
                         end = Offset(canvasWidth, y8h),
-                        strokeWidth = 1.5f,
+                        strokeWidth = 1.2f,
                         pathEffect = dashPathEffect
                     )
 
@@ -253,7 +238,7 @@ fun ModernSleepBarChart(
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         primaryColor,
-                                        primaryColor.copy(alpha = 0.65f)
+                                        primaryColor.copy(alpha = 0.60f)
                                     ),
                                     startY = top,
                                     endY = canvasHeight
@@ -271,8 +256,8 @@ fun ModernSleepBarChart(
                             // Selected highlight halo
                             if (isSelected) {
                                 drawCircle(
-                                    color = tertiaryColor,
-                                    radius = currentBarWidth * 0.45f,
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    radius = currentBarWidth * 0.35f,
                                     center = Offset(centerX, top + currentBarWidth * 0.45f)
                                 )
                             }
@@ -353,21 +338,22 @@ private fun DayInspectionPill(
     bar: DailyChartBar,
     meanDurationHours: Double
 ) {
-    val fullDateFormatter = remember { DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH) }
+    val fullDateFormatter = remember { DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH) }
     val formattedDate = remember(bar.date) {
         bar.date.format(fullDateFormatter).replaceFirstChar { it.uppercase() }
     }
+    val pillShape = RoundedCornerShape(16.dp)
 
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(pillShape)
+            .background(glassGradient(alphaTop = 0.85f, alphaBottom = 0.60f))
+            .border(1.dp, glassBorderBrush(alphaStart = 0.30f, alphaEnd = 0.08f), pillShape)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -387,35 +373,35 @@ private fun DayInspectionPill(
                             imageVector = Icons.Default.Bedtime,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(13.dp)
+                            modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = "${bar.startTimeFormatted} → ${bar.stopTimeFormatted}",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         if (bar.rating != null && bar.rating > 0) {
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
                                 tint = WarmAmberTertiary,
-                                modifier = Modifier.size(13.dp)
+                                modifier = Modifier.size(11.dp)
                             )
                             Text(
-                                text = "${bar.rating}/5",
-                                style = MaterialTheme.typography.bodySmall,
+                                text = "${bar.rating}",
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 } else if (!bar.isTracked) {
                     Text(
-                        text = "Aucun sommeil enregistré",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        text = "Pas de données",
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -433,8 +419,11 @@ private fun DayInspectionPill(
                     val sign = if (deltaMin >= 0) "+" else ""
                     val deltaColor = if (deltaMin >= 0) MaterialTheme.colorScheme.primary else WarmAmberTertiary
                     Text(
-                        text = "$sign$deltaMin min vs moy.",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        text = "$sign$deltaMin min",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
                         color = deltaColor
                     )
                 }
