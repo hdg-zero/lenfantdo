@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "com.hdgdev.lenfantdo"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 20260916
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
