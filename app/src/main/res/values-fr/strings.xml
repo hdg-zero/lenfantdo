@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">L\'enfant do</string>
+    <string name="start">Commencer</string>
+    <string name="stop">Arrêter</string>
+    <string name="start_again">Recommencer</string>
+    <string name="press_start">Appuyez sur le bouton ci-dessous pour commencer le suivi</string>
+    <string name="stopped_on">Arrêté le</string>
+    <string name="started_on">Commencé le</string>
+    <string name="slept_for_label">Durée suivie</string>
+    <string name="awake_for_label">Éveillé depuis</string>
+    <string name="sleeps">Sessions</string>
+    <string name="status">Statut</string>
+    <string name="import_file_item">Importer un fichier</string>
+    <string name="export_file_item">Exporter vers un fichier</string>
+    <string name="import_success">Importation terminée avec succès</string>
+    <string name="export_success">Exportation terminée avec succès</string>
+    <string name="export_failure">Échec de l\'exportation : %s</string>
+    <string name="backup_success">Sauvegarde terminée avec succès</string>
+    <string name="backup_failure">Échec de la sauvegarde</string>
+    <string name="sleeping_since">Suivi en cours depuis %s</string>
+    <string name="past">Historique des sessions</string>
+    <string name="tracking_stopped">Suivi arrêté</string>
+    <string name="deleted">Supprimé</string>
+    <string name="undo">Annuler</string>
+    <string name="about_item">À propos</string>
+    <string name="about_toolbar">À propos</string>
+    <string name="app_description">Journal de sommeil privé et hors ligne.</string>
+    <string name="sleep_id">Session #%s</string>
+    <string name="settings">Paramètres</string>
+    <string name="widget_start_stop">Démarrer / Arrêter</string>
+</resources>

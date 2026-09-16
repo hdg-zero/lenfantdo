@@ -13,7 +13,7 @@ RC=0
 
 for file in $(git ls-files|grep '\.kt$')
 do
-    if ! grep -q SPDX-License-Identifier: $file; then
+    if [ -f "$file" ] && ! grep -q SPDX-License-Identifier: $file; then
         echo "Missing license header in $file"
         RC=1
     fi

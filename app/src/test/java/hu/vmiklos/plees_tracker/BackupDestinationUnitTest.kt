@@ -11,8 +11,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Unit tests for BackupDestination: JSON (de)serialization of the multi-account backup destination
- * list, and the legacy single-destination migration logic.
+ * Unit tests for BackupDestination: JSON (de)serialization of the local folder backup destination,
+ * ensuring legacy drive destinations are safely ignored.
  */
 class BackupDestinationUnitTest {
 
@@ -26,23 +26,16 @@ class BackupDestinationUnitTest {
     }
 
     @Test
-    fun testDriveAccountRoundTrip() {
-        val original = listOf<BackupDestination>(
-            BackupDestination.DriveAccount("user@example.com", "daily")
+    fun testDriveEntriesAreIgnored() {
+        val json = """[
+            {"type":"drive","email":"user@example.com","frequency":"daily"},
+            {"type":"folder","path":"content://valid"}
+        ]"""
+        val restored = BackupDestination.listFromJson(json)
+        assertEquals(
+            listOf(BackupDestination.LocalFolder("content://valid")),
+            restored
         )
-        val restored = BackupDestination.listFromJson(BackupDestination.listToJson(original))
-        assertEquals(original, restored)
-    }
-
-    @Test
-    fun testMixedListPreservesOrder() {
-        val original = listOf(
-            BackupDestination.DriveAccount("a@example.com", "on_change"),
-            BackupDestination.LocalFolder("content://folder"),
-            BackupDestination.DriveAccount("b@example.com", "daily")
-        )
-        val restored = BackupDestination.listFromJson(BackupDestination.listToJson(original))
-        assertEquals(original, restored)
     }
 
     @Test
@@ -82,39 +75,6 @@ class BackupDestinationUnitTest {
     fun testFolderWithoutPathIsSkipped() {
         val json = """[{"type":"folder"}]"""
         assertTrue(BackupDestination.listFromJson(json).isEmpty())
-    }
-
-    @Test
-    fun testDriveWithoutEmailIsSkipped() {
-        val json = """[{"type":"drive","frequency":"daily"}]"""
-        assertTrue(BackupDestination.listFromJson(json).isEmpty())
-    }
-
-    @Test
-    fun testDriveWithoutFrequencyDefaultsToDaily() {
-        val json = """[{"type":"drive","email":"user@example.com"}]"""
-        val restored = BackupDestination.listFromJson(json)
-        assertEquals(
-            listOf(BackupDestination.DriveAccount("user@example.com", "daily")),
-            restored
-        )
-    }
-
-    @Test
-    fun testValidEntriesSurviveAlongsideInvalidOnes() {
-        val json = """[
-            {"type":"drive","email":"good@example.com","frequency":"daily"},
-            {"type":"folder"},
-            {"type":"folder","path":"content://valid"}
-        ]"""
-        val restored = BackupDestination.listFromJson(json)
-        assertEquals(
-            listOf(
-                BackupDestination.DriveAccount("good@example.com", "daily"),
-                BackupDestination.LocalFolder("content://valid")
-            ),
-            restored
-        )
     }
 
     @Test

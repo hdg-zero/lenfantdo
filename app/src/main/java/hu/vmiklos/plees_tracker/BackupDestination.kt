@@ -9,30 +9,19 @@ package hu.vmiklos.plees_tracker
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** A single configured backup target: either a local folder or a Google Drive account. */
+/** A single configured backup target: a local folder. */
 sealed class BackupDestination {
 
     data class LocalFolder(val path: String) : BackupDestination()
 
-    data class DriveAccount(
-        val email: String,
-        val frequency: String = "daily"
-    ) : BackupDestination()
-
     fun toJson(): JSONObject = when (this) {
         is LocalFolder -> JSONObject().put("type", "folder").put("path", path)
-        is DriveAccount -> JSONObject()
-            .put("type", "drive")
-            .put("email", email)
-            .put("frequency", frequency)
     }
 
     companion object {
         private fun fromJson(json: JSONObject): BackupDestination? = when (json.optString("type")) {
             "folder" -> json.optString("path").takeIf { it.isNotEmpty() }
                 ?.let { LocalFolder(it) }
-            "drive" -> json.optString("email").takeIf { it.isNotEmpty() }
-                ?.let { DriveAccount(it, json.optString("frequency", "daily")) }
             else -> null
         }
 

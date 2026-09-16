@@ -45,8 +45,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
-import hu.vmiklos.plees_tracker.calendar.CalendarImport
-import hu.vmiklos.plees_tracker.calendar.UserCalendar
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -62,18 +60,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     // SharedPreferences keeps listeners in a WeakHashMap, so keep this as a member.
     private val sharedPreferenceListener = SharedPreferencesChangeListener()
-
-    private val exportPermissionLauncher = registerForActivityResult(
-        RequestMultiplePermissions()
-    ) { permissions: Map<String, Boolean> ->
-        checkCalendarPermissionGranted(permissions, ::exportCalendarData)
-    }
-
-    private val importPermissionLauncher = registerForActivityResult(
-        RequestMultiplePermissions()
-    ) { permissions: Map<String, Boolean> ->
-        checkCalendarPermissionGranted(permissions, ::importCalendarData)
-    }
 
     private val importActivityResult =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -133,14 +119,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
         DataModel.init(applicationContext, preferences)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    HealthConnectBackend.scheduleReconcile(applicationContext)
-                }
-            }
-        }
 
         viewModel = ViewModelProvider.AndroidViewModelFactory(application)
             .create(MainViewModel::class.java)
@@ -415,20 +393,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.import_calendar_data -> {
-                checkForCalendarPermission(importPermissionLauncher, ::importCalendarData)
-                return true
-            }
             R.id.import_file_data -> {
                 importFileData()
                 return true
             }
             R.id.export_file_data -> {
                 exportFileData()
-                return true
-            }
-            R.id.export_calendar_data -> {
-                checkForCalendarPermission(exportPermissionLauncher, ::exportCalendarData)
                 return true
             }
             R.id.about -> {
@@ -438,11 +408,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                     .withAboutDescription(getString(R.string.app_description))
                     .start(this)
-                return true
-            }
-            R.id.documentation -> {
-                val website = getString(R.string.website_link)
-                open(Uri.parse(website))
                 return true
             }
             R.id.settings -> {
@@ -473,82 +438,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             else -> return super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun checkCalendarPermissionGranted(
-        granted: Map<String, Boolean>,
-        onSuccess: (UserCalendar) -> Unit
-    ) {
-        // Check all permissions were granted
-        if (granted.values.all { it }) {
-            // Start picker for calendar
-            showUserCalendarPicker(onSuccess)
-        } else {
-            // Permission denied
-            Toast.makeText(
-                this, getString(R.string.calendar_permission_required), Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    private fun checkForCalendarPermission(
-        permissionLauncher: ActivityResultLauncher<Array<String>>,
-        block: (UserCalendar) -> Unit
-    ) {
-        when (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)) {
-            PackageManager.PERMISSION_GRANTED -> showUserCalendarPicker(block)
-            else -> {
-                // Directly ask for the permissions
-                permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.WRITE_CALENDAR
-                    )
-                )
-            }
-        }
-    }
-
-    private inline fun showUserCalendarPicker(crossinline block: (cal: UserCalendar) -> Unit) {
-
-        // Fetch calendar data
-        val calendars = CalendarImport.queryForCalendars(this)
-
-        // No user calendars found, show dialog informing user
-        if (calendars.isEmpty()) {
-            showNoCalendarsFoundDialog()
-            return
-        }
-
-        // Get name of calendar(s)
-        val titles = calendars.map(UserCalendar::name).toTypedArray()
-        var selectedItem = 0
-
-        // Show User Calendar picker
-        MaterialAlertDialogBuilder(this)
-            .setTitle(getString(R.string.select_calendar_dialog_title))
-            .setNeutralButton(getString(R.string.select_calendar_dialog_negative), null)
-            .setPositiveButton(getString(R.string.select_calendar_dialog_positive)) { _, _ ->
-                block.invoke(calendars[selectedItem])
-            }.setSingleChoiceItems(titles, selectedItem) { _, newSelection ->
-                selectedItem = newSelection
-            }.show()
-    }
-
-    private fun importCalendarData(selectedItem: UserCalendar) {
-        viewModel.importDataFromCalendar(this, selectedItem.id)
-    }
-
-    private fun exportCalendarData(selectedItem: UserCalendar) {
-        viewModel.exportDataToCalendar(this, selectedItem.id)
-    }
-
-    private fun showNoCalendarsFoundDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(getString(R.string.select_calendar_dialog_title))
-            .setMessage(getString(R.string.import_dialog_error_message))
-            .setNegativeButton(getString(R.string.dismiss), null)
-            .show()
     }
 
     private fun open(link: Uri) {

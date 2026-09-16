@@ -6,42 +6,16 @@
 
 package hu.vmiklos.plees_tracker
 
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
 import kotlinx.coroutines.launch
 
-private class HealthConnectSwitchPreference(context: Context) : SwitchPreference(context) {
-    var checkPending = false
-        set(value) {
-            if (field != value) {
-                field = value
-                notifyChanged()
-            }
-        }
-
-    override fun onBindViewHolder(holder: PreferenceViewHolder) {
-        super.onBindViewHolder(holder)
-        holder.findViewById(android.R.id.switch_widget)?.isEnabled = isEnabled && !checkPending
-    }
-}
-
 class Preferences : PreferenceFragmentCompat() {
-    companion object {
-        private const val TAG = "Preferences"
-    }
-
-    // Cached hasBackup state per email, loaded asynchronously on fragment start.
-    private val driveHasBackup = mutableMapOf<String, Boolean>()
 
     private fun padMinute(raw: String): String {
         val fro = ":([0-9])$".toRegex()
@@ -52,7 +26,6 @@ class Preferences : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         setupBackupPreferences()
-        setupHealthConnectPreference()
         val wakeup = findPreference<Preference>("wakeup")
         wakeup?.let {
             val preferences = DataModel.preferences
@@ -71,172 +44,10 @@ class Preferences : PreferenceFragmentCompat() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        refreshHealthConnectState()
-    }
-
-    private fun setupHealthConnectPreference() {
-        val category = findPreference<PreferenceCategory>("health_connect_category") ?: return
-        val healthConnectPreference = HealthConnectSwitchPreference(requireContext()).apply {
-            key = HealthConnectBackend.ENABLED_KEY
-            order = 0
-            isPersistent = false
-            setTitle(R.string.settings_health_connect)
-            setSummary(R.string.settings_health_connect_off)
-        }
-        category.addPreference(healthConnectPreference)
-        healthConnectPreference.setOnPreferenceChangeListener { _, newValue ->
-            if ((activity as? PreferencesActivity)?.healthConnectCheckPending == true) {
-                return@setOnPreferenceChangeListener false
-            }
-            if (newValue != true) {
-                HealthConnectBackend.setEnabled(requireContext(), false)
-                HealthConnectBackend.cancelSync(requireContext())
-                return@setOnPreferenceChangeListener true
-            }
-            when (HealthConnectBackend.availability(requireContext())) {
-                HealthConnectBackend.Availability.UNAVAILABLE -> false
-                HealthConnectBackend.Availability.UPDATE_REQUIRED -> {
-                    (activity as? PreferencesActivity)?.openHealthConnectProvider()
-                    false
-                }
-                HealthConnectBackend.Availability.AVAILABLE -> {
-                    (activity as? PreferencesActivity)?.requestHealthConnectPermission()
-                    false
-                }
-            }
-        }
-        object : Preference(requireContext()) {
-            override fun onBindViewHolder(holder: PreferenceViewHolder) {
-                super.onBindViewHolder(holder)
-                holder.itemView.findViewById<View>(R.id.health_connect_skip_check)
-                    .setOnClickListener {
-                        (activity as? PreferencesActivity)?.skipHealthConnectHistoryCheck()
-                    }
-                holder.itemView.findViewById<View>(R.id.health_connect_cancel_check)
-                    .setOnClickListener {
-                        (activity as? PreferencesActivity)?.cancelHealthConnectHistoryCheck()
-                    }
-            }
-        }.apply {
-            key = PreferencesActivity.HEALTH_CONNECT_CHECK_ACTIONS_KEY
-            order = 1
-            layoutResource = R.layout.preference_health_connect_check
-            isSelectable = false
-            isVisible = false
-            category.addPreference(this)
-        }
-        Preference(requireContext()).apply {
-            key = PreferencesActivity.HEALTH_CONNECT_FORCE_SYNC_KEY
-            order = 2
-            setTitle(R.string.settings_health_connect_force_sync)
-            setSummary(R.string.settings_health_connect_force_sync_summary)
-            isVisible = false
-            setOnPreferenceClickListener {
-                (activity as? PreferencesActivity)?.forceHealthConnectSync()
-                true
-            }
-            category.addPreference(this)
-        }
-    }
-
-    private fun refreshHealthConnectState() {
-        val preference = findPreference<HealthConnectSwitchPreference>(
-            HealthConnectBackend.ENABLED_KEY
-        )
-            ?: return
-        val checking = (activity as? PreferencesActivity)?.healthConnectCheckPending == true
-        findPreference<Preference>(PreferencesActivity.HEALTH_CONNECT_CHECK_ACTIONS_KEY)
-            ?.isVisible = checking
-        val forceSyncPreference = findPreference<Preference>(
-            PreferencesActivity.HEALTH_CONNECT_FORCE_SYNC_KEY
-        )
-        forceSyncPreference?.isVisible = false
-        if (checking) {
-            // Reflect the attempted opt-in without enabling synchronization until the check or
-            // an explicit skip completes.
-            preference.isChecked = true
-            // Disabling the entire preference would also dim its status message. Disable only the
-            // switch widget, while the change listener keeps the row inert.
-            preference.isEnabled = true
-            preference.checkPending = true
-            preference.setSummary(R.string.settings_health_connect_checking)
-            return
-        }
-        preference.checkPending = false
-        when (HealthConnectBackend.availability(requireContext())) {
-            HealthConnectBackend.Availability.UNAVAILABLE -> {
-                HealthConnectBackend.setEnabled(requireContext(), false)
-                preference.isEnabled = false
-                preference.isChecked = false
-                preference.setSummary(R.string.settings_health_connect_unavailable)
-            }
-            HealthConnectBackend.Availability.UPDATE_REQUIRED -> {
-                HealthConnectBackend.setEnabled(requireContext(), false)
-                preference.isEnabled = HealthConnectProviderInstaller.isSupported
-                preference.isChecked = false
-                preference.setSummary(
-                    if (HealthConnectProviderInstaller.isSupported) {
-                        R.string.settings_health_connect_update
-                    } else {
-                        R.string.settings_health_connect_update_manually
-                    }
-                )
-            }
-            HealthConnectBackend.Availability.AVAILABLE -> {
-                preference.isEnabled = true
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                    return
-                }
-                lifecycleScope.launch {
-                    val stored = HealthConnectBackend.isEnabled(requireContext())
-                    val knownGranted = (activity as? PreferencesActivity)
-                        ?.healthConnectPermissionKnownGranted == true
-                    val granted = if (knownGranted) {
-                        true
-                    } else {
-                        try {
-                            HealthConnectBackend.hasWritePermission(requireContext())
-                        } catch (e: Exception) {
-                            Log.e(TAG, "refreshHealthConnectState: $e")
-                            // A transient provider error is not a revocation. Preserve the user's
-                            // opt-in and let the worker retry synchronization later.
-                            preference.isChecked = stored
-                            preference.setSummary(
-                                if (stored) {
-                                    R.string.settings_health_connect_on
-                                } else {
-                                    R.string.settings_health_connect_off
-                                }
-                            )
-                            forceSyncPreference?.isVisible = stored
-                            return@launch
-                        }
-                    }
-                    if (stored && !granted) {
-                        HealthConnectBackend.setEnabled(requireContext(), false)
-                        HealthConnectBackend.cancelSync(requireContext())
-                    }
-                    preference.isChecked = stored && granted
-                    forceSyncPreference?.isVisible = preference.isChecked
-                    preference.setSummary(
-                        if (preference.isChecked) {
-                            R.string.settings_health_connect_on
-                        } else {
-                            R.string.settings_health_connect_off
-                        }
-                    )
-                }
-            }
-        }
-    }
-
     private fun setupBackupPreferences() {
         val category = findPreference<PreferenceCategory>("backup_destinations_category") ?: return
         val staticKeys = setOf("automatic_backup", "add_backup_destination", "pretty_backup")
 
-        // Remove previously-added dynamic destination rows (preserves static items).
         val toRemove = (0 until category.preferenceCount)
             .map { category.getPreference(it) }
             .filter { it.key !in staticKeys }
@@ -244,9 +55,6 @@ class Preferences : PreferenceFragmentCompat() {
 
         val destinations = DataModel.getDestinations()
         findPreference<SwitchPreference>("automatic_backup")?.apply {
-            // Automatic backup needs at least one destination: turning the switch on with none
-            // configured starts the add flow (which re-runs this setup; the switch falls back to
-            // off below when the flow ended without adding anything, e.g. it was cancelled).
             if (isChecked && destinations.isEmpty()) {
                 isChecked = false
             }
@@ -270,184 +78,46 @@ class Preferences : PreferenceFragmentCompat() {
                             true
                         }
                     }
-                    is BackupDestination.DriveAccount -> {
-                        title = getString(R.string.backup_target_drive)
-                        // Placeholder until the async hasBackup result arrives.
-                        summary = if (driveHasBackup.containsKey(dest.email)) {
-                            buildDriveSummary(dest, driveHasBackup[dest.email])
-                        } else {
-                            "${dest.email} · ${getString(R.string.drive_checking_backup)}"
-                        }
-                        setOnPreferenceClickListener {
-                            showDriveOptions(dest)
-                            true
-                        }
-                    }
                 }
             }
             category.addPreference(pref)
-            // Grey the row out while the master switch is off; must be set after addPreference,
-            // the dependency is only resolvable once the row is part of the hierarchy.
             pref.dependency = "automatic_backup"
         }
 
         findPreference<Preference>("add_backup_destination")?.apply {
-            // One destination of each type: the label names what the button will actually add,
-            // and the row disappears once both a folder and a Drive account are configured.
             val folderAddable = destinations.none { it is BackupDestination.LocalFolder }
-            val driveAddable = DriveBackend.isSupported &&
-                destinations.none { it is BackupDestination.DriveAccount }
-            isVisible = folderAddable || driveAddable
-            setTitle(
-                when {
-                    folderAddable && driveAddable -> R.string.settings_add_backup_destination
-                    folderAddable -> R.string.settings_add_device_backup_destination
-                    else -> R.string.settings_add_drive_backup_destination
-                }
-            )
+            isVisible = folderAddable
+            setTitle(R.string.settings_add_device_backup_destination)
             setOnPreferenceClickListener {
                 (activity as? PreferencesActivity)?.promptAddDestination()
                 true
             }
         }
-
-        // Async: refresh hasBackup state and update summaries for Drive accounts.
-        val ctx = requireContext().applicationContext
-        for ((index, dest) in destinations.withIndex()) {
-            if (dest !is BackupDestination.DriveAccount) continue
-            lifecycleScope.launch {
-                if (!DriveBackend.isAccountOnDevice(ctx, dest.email)) {
-                    // The account was removed from the device's system settings: backups can't
-                    // run until it is added back, or the user picks another via "Change account".
-                    findPreference<Preference>("dest_$index")?.summary =
-                        "${dest.email} · ${getString(R.string.drive_account_unavailable)}"
-                    return@launch
-                }
-                val has = DriveBackend.hasBackup(ctx, dest.email)
-                driveHasBackup[dest.email] = has
-                findPreference<Preference>("dest_$index")
-                    ?.summary = buildDriveSummary(dest, has)
-            }
-        }
-    }
-
-    private fun buildDriveSummary(
-        dest: BackupDestination.DriveAccount,
-        hasBackup: Boolean?
-    ): String {
-        val freqLabel = if (dest.frequency == "daily") {
-            getString(R.string.drive_backup_frequency_daily)
-        } else {
-            getString(R.string.drive_backup_frequency_on_change)
-        }
-        return if (hasBackup == true) "${dest.email} · $freqLabel" else dest.email
-    }
-
-    private fun showDriveOptions(dest: BackupDestination.DriveAccount) {
-        val cached = driveHasBackup[dest.email]
-        if (cached != null) {
-            buildDriveOptionsDialog(dest, cached)
-            return
-        }
-        // Result not yet available (e.g. slow network): fetch on-demand before showing the
-        // dialog so Restore and Delete appear or stay hidden based on the actual backup state.
-        lifecycleScope.launch {
-            val ctx = requireContext().applicationContext
-            val has = DriveBackend.hasBackup(ctx, dest.email)
-            driveHasBackup[dest.email] = has
-            // Update the summary now that we have the real result.
-            val index = DataModel.getDestinations().indexOf(dest)
-            if (index >= 0) {
-                findPreference<Preference>("dest_$index")?.summary = buildDriveSummary(dest, has)
-            }
-            buildDriveOptionsDialog(dest, has)
-        }
-    }
-
-    private fun buildDriveOptionsDialog(dest: BackupDestination.DriveAccount, hasBackup: Boolean) {
-        val items = buildList {
-            add(getString(R.string.drive_backup_now))
-            add(getString(R.string.drive_frequency_change))
-            if (hasBackup) add(getString(R.string.drive_restore))
-            if (hasBackup) add(getString(R.string.drive_delete))
-            add(getString(R.string.drive_account_change))
-            add(getString(R.string.drive_account_remove))
-        }
-        AlertDialog.Builder(requireContext())
-            .setTitle(dest.email)
-            .setItems(items.toTypedArray()) { _, which ->
-                val activity = activity as? PreferencesActivity ?: return@setItems
-                when (items[which]) {
-                    getString(R.string.drive_backup_now) ->
-                        activity.backupNow(dest.email)
-                    getString(R.string.drive_frequency_change) ->
-                        activity.changeFrequency(dest)
-                    getString(R.string.drive_restore) ->
-                        activity.confirmRestoreFromDrive(dest.email)
-                    getString(R.string.drive_delete) ->
-                        confirmDeleteFromDrive(dest.email)
-                    getString(R.string.drive_account_change) ->
-                        activity.changeDriveAccount(dest)
-                    getString(R.string.drive_account_remove) ->
-                        confirmRemoveDriveAccount(dest.email, hasBackup)
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun confirmDeleteFromDrive(email: String) {
-        AlertDialog.Builder(requireContext())
-            .setMessage(R.string.drive_delete_confirm)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                (activity as? PreferencesActivity)?.deleteFromDrive(email)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun confirmRemoveDriveAccount(email: String, hasBackup: Boolean) {
-        val builder = AlertDialog.Builder(requireContext())
-        if (hasBackup) {
-            // An AlertDialog list replaces the message area, so the question goes in the title.
-            val deleteBackup = booleanArrayOf(false)
-            builder
-                .setTitle(R.string.destination_remove_confirm)
-                .setMultiChoiceItems(
-                    arrayOf(getString(R.string.drive_remove_also_delete)), deleteBackup
-                ) { _, _, isChecked -> deleteBackup[0] = isChecked }
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    (activity as? PreferencesActivity)
-                        ?.removeDriveAccount(email, deleteBackup[0])
-                }
-        } else {
-            builder
-                .setMessage(R.string.destination_remove_confirm)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    (activity as? PreferencesActivity)
-                        ?.removeDriveAccount(email, deleteBackup = false)
-                }
-        }
-        builder.setNegativeButton(android.R.string.cancel, null).show()
     }
 
     private fun showFolderOptions(dest: BackupDestination.LocalFolder) {
-        // The existence check is local-only and fast, so resolve it before building the dialog;
-        // the remove confirmation only offers backup deletion when there is a file to delete.
         lifecycleScope.launch {
             val ctx = requireContext().applicationContext
             val hasBackup = DataModel.hasFolderBackup(ctx, dest.path)
-            val items = arrayOf(
-                getString(R.string.folder_change_path),
-                getString(R.string.folder_destination_remove)
-            )
+            val items = buildList {
+                add(getString(R.string.drive_backup_now))
+                if (hasBackup) {
+                    add(getString(R.string.drive_restore))
+                }
+                add(getString(R.string.folder_change_path))
+                add(getString(R.string.folder_destination_remove))
+            }
             AlertDialog.Builder(requireContext())
                 .setTitle(R.string.backup_target_folder)
-                .setItems(items) { _, which ->
+                .setItems(items.toTypedArray()) { _, which ->
                     val activity = activity as? PreferencesActivity ?: return@setItems
                     when (items[which]) {
+                        getString(R.string.drive_backup_now) ->
+                            activity.triggerManualFolderBackup(dest.path)
+                        getString(R.string.drive_restore) ->
+                            activity.confirmRestoreFromFolder(dest.path)
                         getString(R.string.folder_change_path) ->
-                            activity.changeFolderPath(dest)
+                            activity.changeFolder(dest)
                         getString(R.string.folder_destination_remove) ->
                             confirmRemoveFolder(dest, hasBackup)
                     }
@@ -460,23 +130,25 @@ class Preferences : PreferenceFragmentCompat() {
     private fun confirmRemoveFolder(dest: BackupDestination.LocalFolder, hasBackup: Boolean) {
         val builder = AlertDialog.Builder(requireContext())
         if (hasBackup) {
-            // An AlertDialog list replaces the message area, so the question goes in the title.
             val deleteBackup = booleanArrayOf(false)
             builder
                 .setTitle(R.string.destination_remove_confirm)
                 .setMultiChoiceItems(
-                    arrayOf(getString(R.string.folder_remove_also_delete)), deleteBackup
-                ) { _, _, isChecked -> deleteBackup[0] = isChecked }
+                    arrayOf(getString(R.string.folder_remove_also_delete)),
+                    deleteBackup
+                ) { _, _, isChecked ->
+                    deleteBackup[0] = isChecked
+                }
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     (activity as? PreferencesActivity)
-                        ?.removeFolderDestination(dest, deleteBackup[0])
+                        ?.removeFolder(dest.path, deleteBackup[0])
                 }
         } else {
             builder
                 .setMessage(R.string.destination_remove_confirm)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     (activity as? PreferencesActivity)
-                        ?.removeFolderDestination(dest, deleteBackup = false)
+                        ?.removeFolder(dest.path, deleteBackup = false)
                 }
         }
         builder.setNegativeButton(android.R.string.cancel, null).show()

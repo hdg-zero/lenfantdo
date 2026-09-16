@@ -1,6 +1,6 @@
 <resources
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">Plees Tracker</string>
+    <string name="app_name" translatable="false">L\'enfant do</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="start_again">Start again</string>
@@ -18,6 +18,8 @@
     <string name="import_success">Import finished successfully</string>
     <string name="export_success">Export finished successfully</string>
     <string name="export_failure">Export failed: %s</string>
+    <string name="backup_success">Backup finished successfully</string>
+    <string name="backup_failure">Backup failed</string>
     <string name="sleeping_since">Sleeping since %s</string>
     <string name="past">Past sleeps</string>
     <string name="tracking_stopped">Tracking stopped</string>

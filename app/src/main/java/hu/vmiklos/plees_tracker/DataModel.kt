@@ -27,8 +27,6 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
-import hu.vmiklos.plees_tracker.calendar.CalendarExport
-import hu.vmiklos.plees_tracker.calendar.CalendarImport
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
@@ -233,71 +231,37 @@ object DataModel {
         preferences.edit {
             remove("start")
         }
-        scheduleHealthConnectSync()
     }
 
     suspend fun insertSleep(sleep: Sleep) {
-        database.withTransaction {
-            if (sleep.healthConnectId.isNotEmpty()) {
-                database.healthConnectDao().deleteDeletions(listOf(sleep.healthConnectId))
-            }
-            database.sleepDao().insert(sleep)
-        }
-        scheduleHealthConnectSync()
+        database.sleepDao().insert(sleep)
     }
 
     private suspend fun insertSleeps(sleepList: List<Sleep>) {
         if (sleepList.isEmpty()) {
             return
         }
-        database.withTransaction {
-            database.healthConnectDao().deleteDeletionsBatched(
-                sleepList.map { it.healthConnectId }.filter { it.isNotEmpty() }
-            )
-            database.sleepDao().insert(sleepList)
-        }
+        database.sleepDao().insert(sleepList)
     }
 
     suspend fun updateSleep(sleep: Sleep) {
-        sleep.healthConnectVersion++
         database.sleepDao().update(sleep)
-        scheduleHealthConnectSync()
     }
 
     suspend fun deleteSleep(sleep: Sleep) {
         deleteSleepFromDatabase(sleep)
-        scheduleHealthConnectSync()
     }
 
     internal suspend fun deleteSleepFromDatabase(sleep: Sleep) {
         database.withTransaction {
             val current = database.sleepDao().getByIdOrNull(sleep.sid)
                 ?: return@withTransaction
-            if (current.healthConnectId.isNotEmpty()) {
-                database.healthConnectDao().insertDeletions(listOf(deletionFor(current)))
-            }
             database.sleepDao().delete(current)
         }
     }
 
     suspend fun deleteAllSleep() {
-        database.withTransaction {
-            val sleeps = database.sleepDao().getAll()
-            database.healthConnectDao().insertDeletions(
-                sleeps.filter { it.healthConnectId.isNotEmpty() }.map(::deletionFor)
-            )
-            database.sleepDao().deleteAll()
-        }
-        scheduleHealthConnectSync()
-    }
-
-    private fun deletionFor(sleep: Sleep): HealthConnectDeletion = HealthConnectDeletion().apply {
-        healthConnectId = sleep.healthConnectId
-        start = sleep.start
-    }
-
-    fun scheduleHealthConnectSync() {
-        HealthConnectBackend.scheduleSync(appContext)
+        database.sleepDao().deleteAll()
     }
 
     suspend fun getSleepById(sid: Int): Sleep {
@@ -403,35 +367,8 @@ object DataModel {
      */
     private suspend fun insertNewSleeps(importedSleeps: List<Sleep>) {
         val oldSleeps = database.sleepDao().getAll()
-        val usedIds = oldSleeps.mapNotNullTo(mutableSetOf()) {
-            it.healthConnectId.ifEmpty { null }
-        }
-        val newSleeps = importedSleeps.subtract(oldSleeps.toSet()).onEach { sleep ->
-            if (sleep.healthConnectId.isNotEmpty() && !usedIds.add(sleep.healthConnectId)) {
-                sleep.healthConnectId = ""
-                sleep.healthConnectVersion = 0
-            }
-        }
+        val newSleeps = importedSleeps.subtract(oldSleeps.toSet())
         insertSleeps(newSleeps.toList())
-        scheduleHealthConnectSync()
-    }
-
-    suspend fun importHealthConnectSleeps(sleeps: List<Sleep>) {
-        insertNewSleeps(healthConnectImportCandidates(sleeps))
-    }
-
-    /**
-     * Returns provider sleeps which are not already represented locally. Matching Health Connect
-     * IDs belong to the local source of truth even if their contents differ; matching contents
-     * with a different ID are also skipped to avoid creating a visible duplicate.
-     */
-    suspend fun healthConnectImportCandidates(sleeps: List<Sleep>): List<Sleep> {
-        val localSleeps = database.sleepDao().getAll()
-        val localIds = localSleeps.mapTo(mutableSetOf()) { it.healthConnectId }
-        val localContents = localSleeps.toSet()
-        return sleeps.filter { sleep ->
-            sleep.healthConnectId !in localIds && sleep !in localContents
-        }
     }
 
     /**
@@ -441,82 +378,10 @@ object DataModel {
         return database.sleepDao().count() > 0
     }
 
-    /**
-     * Restores sleeps from the Google Drive backup (gplay flavor only). Returns true on success.
-     * With [override] the local sleeps are replaced by the backup; otherwise the backup is merged
-     * into the existing data. The local data is only cleared after both the download and the
-     * parse succeeded, so a failed fetch or a corrupt backup never wipes existing sleeps.
-     */
-    suspend fun restoreFromDrive(context: Context, email: String, override: Boolean): Boolean {
-        val data = DriveBackend.download(context, email) ?: return false
-        val sleeps = parseSleepsCsv(InputStreamReader(ByteArrayInputStream(data))) ?: return false
-        if (override) {
-            deleteAllSleep()
-        }
-        insertNewSleeps(sleeps)
-        return true
-    }
-
-    suspend fun importDataFromCalendar(context: Context, calendarId: String) {
-        // Query the calendar for events
-        val importedSleeps = CalendarImport.queryForEvents(
-            context, calendarId
-        ).map(CalendarImport::mapEventToSleep)
-        val oldSleeps = database.sleepDao().getAll()
-        val newSleeps = importedSleeps.subtract(oldSleeps.toSet())
-
-        // Insert the list of Sleep into DB
-        insertSleeps(newSleeps.toList())
-        scheduleHealthConnectSync()
-
-        // Show how many sleeps were imported.
-        val text = context.resources.getQuantityString(
-            R.plurals.imported_items,
-            newSleeps.size,
-            newSleeps.size
-        )
-        val duration = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(context, text, duration)
-        toast.show()
-    }
-
-    suspend fun exportDataToCalendar(context: Context, calendarId: String) {
-        val calendarSleeps = CalendarImport.queryForEvents(
-            context, calendarId
-        ).map(CalendarImport::mapEventToSleep)
-        val sleeps = database.sleepDao().getAll()
-        val exportedSleeps = sleeps.subtract(calendarSleeps.toSet())
-
-        CalendarExport.exportSleep(context, calendarId, exportedSleeps.toList())
-
-        // Show how many sleeps were exported.
-        val text = context.resources.getQuantityString(
-            R.plurals.exported_items,
-            exportedSleeps.size,
-            exportedSleeps.size
-        )
-        val duration = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(context, text, duration)
-        toast.show()
-    }
-
-    /**
-     * Backs up sleeps to all configured destinations. Drive accounts with "on_change" frequency
-     * are uploaded via a WorkManager job, so the upload survives this call's coroutine being
-     * cancelled (e.g. the app is closed) and retries on transient failure; "daily" accounts are
-     * handled by their own periodic worker. Folder backups are written here directly.
-     */
     suspend fun backupSleeps(context: Context, cr: ContentResolver) {
         if (!isAutomaticBackupEnabled()) return
         val destinations = getDestinations()
         if (destinations.isEmpty()) return
-        // Enqueue the Drive uploads first: enqueueing is a fast, persisted WorkManager call that
-        // is not lost if the app is closed mid-backup, unlike the folder write below.
-        for (dest in destinations) {
-            if (dest is BackupDestination.DriveAccount && dest.frequency != "daily") {
-                DriveBackend.scheduleBackup(context, dest.email)
-            }
-        }
         for (dest in destinations) {
             if (dest is BackupDestination.LocalFolder) {
                 backupSleepsToFolder(context, cr, dest.path)
@@ -564,48 +429,36 @@ object DataModel {
         exportDataToFile(context, cr, backup.uri, showToast = false)
     }
 
-    /**
-     * Serializes all sleeps to importable (non-pretty) CSV bytes, used by the Drive backup.
-     */
-    suspend fun serializeSleeps(): ByteArray = withContext(Dispatchers.IO) {
-        val sleeps = database.sleepDao().getAll()
-        val os = ByteArrayOutputStream()
-        writeSleepsCsv(sleeps, os, prettyBackup = false)
-        os.toByteArray()
-    }
-
-    /**
-     * Uploads [data] to [email]'s Drive backup unless it is byte-identical to the last payload
-     * this device successfully uploaded there, so automatic backups (daily worker, on-change)
-     * don't re-send unchanged data. Returns true when the backup is up to date afterwards.
-     * Manual "Back up now" bypasses this and always uploads, which also repairs a backup that
-     * went missing remotely while the stored hash still matches.
-     */
-    suspend fun uploadToDriveIfChanged(context: Context, email: String, data: ByteArray): Boolean {
-        val hash = sha256(data)
-        if (hash == getDriveBackupHash(email)) {
-            return true
-        }
-        val success = DriveBackend.upload(context, email, data)
-        if (success) {
-            setDriveBackupHash(email, hash)
-        }
-        return success
-    }
-
-    private fun getDriveBackupHash(email: String): String? =
-        preferences.getString("drive_backup_hash_$email", null)
-
-    /** Records the hash of [email]'s last uploaded payload; null forgets it (backup deleted). */
-    fun setDriveBackupHash(email: String, hash: String?) {
-        preferences.edit {
-            if (hash == null) {
-                remove("drive_backup_hash_$email")
-            } else {
-                putString("drive_backup_hash_$email", hash)
+    suspend fun backupFolder(context: Context, path: String): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                backupSleepsToFolder(context, context.contentResolver, path)
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "backupFolder: $e")
+                false
             }
         }
-    }
+
+    suspend fun restoreFromFolder(context: Context, path: String, override: Boolean): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val folder = DocumentFile.fromTreeUri(context, Uri.parse(path)) ?: return@withContext false
+                val file = folder.findFile("backup.csv") ?: return@withContext false
+                val inputStream = context.contentResolver.openInputStream(file.uri) ?: return@withContext false
+                val importedSleeps = inputStream.use { parseSleepsCsv(InputStreamReader(it)) } ?: return@withContext false
+                if (override) {
+                    database.sleepDao().deleteAll()
+                    insertSleeps(importedSleeps)
+                } else {
+                    insertNewSleeps(importedSleeps)
+                }
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "restoreFromFolder: $e")
+                false
+            }
+        }
 
     fun sha256(data: ByteArray): String =
         MessageDigest.getInstance("SHA-256").digest(data)
