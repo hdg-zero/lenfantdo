@@ -77,6 +77,21 @@
                 android:resource="@xml/widget_info_toggle" />
         </receiver>
         <receiver android:name=".ReminderReceiver" />
+        <receiver
+            android:name="fr.lenfantdo.tracking.TrackingActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="fr.lenfantdo.tracking.ACTION_STOP_TRACKING" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="fr.lenfantdo.tracking.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

@@ -267,8 +267,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        val intent = Intent(this, MainService::class.java)
-        stopService(intent)
+        fr.lenfantdo.tracking.TrackingManager.getInstance(this).restoreNotificationIfActive()
         val recyclerView = findViewById<RecyclerView>(R.id.sleeps)
         recyclerView.findViewHolderForAdapterPosition(0)?.let {
             // Since the adapter unconditionally gets assigned in `onCreate()`
@@ -280,10 +279,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStop() {
         super.onStop()
-        val intent = Intent(this, MainService::class.java)
-        if (DataModel.start != null && DataModel.stop == null) {
-            startService(intent)
-        }
     }
 
     override fun onClick(view: View?) {
@@ -292,9 +287,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 if (DataModel.start != null && DataModel.stop == null) {
                     DataModel.stop = Calendar.getInstance().time
                     viewModel.stopSleep(applicationContext, contentResolver)
+                    fr.lenfantdo.tracking.TrackingManager.getInstance(this).restoreNotificationIfActive()
                 } else {
                     DataModel.start = Calendar.getInstance().time
                     DataModel.stop = null
+                    fr.lenfantdo.tracking.TrackingManager.getInstance(this).restoreNotificationIfActive()
                 }
                 updateView()
             }

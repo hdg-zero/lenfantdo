@@ -19,6 +19,7 @@
     <string name="backup_success">Sauvegarde terminée avec succès</string>
     <string name="backup_failure">Échec de la sauvegarde</string>
     <string name="sleeping_since">Suivi en cours depuis %s</string>
+    <string name="tracking_in_progress">Suivi du sommeil en cours</string>
     <string name="past">Historique des sessions</string>
     <string name="tracking_stopped">Suivi arrêté</string>
     <string name="deleted">Supprimé</string>

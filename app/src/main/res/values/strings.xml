@@ -21,6 +21,7 @@
     <string name="backup_success">Backup finished successfully</string>
     <string name="backup_failure">Backup failed</string>
     <string name="sleeping_since">Sleeping since %s</string>
+    <string name="tracking_in_progress">Sleep tracking in progress</string>
     <string name="past">Past sleeps</string>
     <string name="tracking_stopped">Tracking stopped</string>
     <string name="deleted">Deleted</string>
