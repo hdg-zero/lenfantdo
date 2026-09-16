@@ -17,10 +17,13 @@ android {
         versionCode = 66
         versionName = "26.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations += listOf("en", "fr")
         ksp {
             arg("room.incremental", "true")
         }
+    }
+
+    androidResources {
+        localeFilters += listOf("en", "fr")
     }
 
     signingConfigs {
