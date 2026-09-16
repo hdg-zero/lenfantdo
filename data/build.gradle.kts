@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "fr.lenfantdo.data"
+    namespace = "com.hdgdev.lenfantdo.data"
     compileSdk {
         version = release(37)
     }

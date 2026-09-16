@@ -21,8 +21,8 @@
 }
 
 # Domain Models
--keep class fr.lenfantdo.domain.model.** { *; }
--keep class fr.lenfantdo.domain.analytics.** { *; }
+-keep class com.hdgdev.lenfantdo.domain.model.** { *; }
+-keep class com.hdgdev.lenfantdo.domain.analytics.** { *; }
 
 # Jetpack Compose and Material 3
 -keep class androidx.compose.material3.** { *; }

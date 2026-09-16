@@ -13,7 +13,7 @@
 
 ## 2. Stockage et cycle de vie des données
 
-- **Stockage sur l'appareil :** Toutes les sessions, préférences et annotations sont enregistrées exclusivement dans la base de données Room privée de l'application (`/data/data/fr.lenfantdo/databases/`).
+- **Stockage sur l'appareil :** Toutes les sessions, préférences et annotations sont enregistrées exclusivement dans la base de données Room privée de l'application (`/data/data/com.hdgdev.lenfantdo/databases/`).
 - **Snapshots locaux de précaution :** Créés dans `noBackupFilesDir` avant un import ou une opération critique. Ils sont effacés lors de la désinstallation de l'application.
 - **Sauvegardes exportables :**
   - Fichiers au format JSON versionné, chiffrés par défaut avec **AES-256-GCM** et dérivation de clé **PBKDF2** à partir d'un mot de passe utilisateur.

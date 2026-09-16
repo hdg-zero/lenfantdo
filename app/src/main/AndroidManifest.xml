@@ -65,14 +65,14 @@
             android:name=".platform.ReminderReceiver"
             android:exported="false" />
         <receiver
-            android:name="fr.lenfantdo.tracking.TrackingActionReceiver"
+            android:name="com.hdgdev.lenfantdo.tracking.TrackingActionReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="fr.lenfantdo.tracking.ACTION_STOP_TRACKING" />
+                <action android:name="com.hdgdev.lenfantdo.tracking.ACTION_STOP_TRACKING" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name="fr.lenfantdo.tracking.BootReceiver"
+            android:name="com.hdgdev.lenfantdo.tracking.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

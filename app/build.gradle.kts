@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "fr.lenfantdo"
+    namespace = "com.hdgdev.lenfantdo"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "fr.lenfantdo"
+        applicationId = "com.hdgdev.lenfantdo"
         minSdk = 24
         targetSdk = 35
         versionCode = 66
