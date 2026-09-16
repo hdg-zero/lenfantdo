@@ -592,10 +592,13 @@ private fun DetailedHistoryGlassCard(
             ) {
                 Column(modifier = Modifier.padding(top = 10.dp)) {
                     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH) }
+                    var displayLimit by remember(bars) { mutableStateOf(30) }
+                    val reversedBars = remember(bars) { bars.reversed() }
+                    val visibleBars = if (reversedBars.size <= 30) reversedBars else reversedBars.take(displayLimit)
 
-                    bars.reversed().forEach { bar ->
-                        val formattedDate = remember(bar.date) {
-                            bar.date.format(dateFormatter).replaceFirstChar { it.uppercase() }
+                    visibleBars.forEach { bar ->
+                        val formattedDate = remember(bar.date, bar.customLabel) {
+                            bar.customLabel ?: bar.date.format(dateFormatter).replaceFirstChar { it.uppercase() }
                         }
                         val rowA11y = "$formattedDate : ${bar.formattedDuration}"
 
@@ -656,6 +659,23 @@ private fun DetailedHistoryGlassCard(
                             }
                         }
                         HorizontalDivider(color = Color.White.copy(alpha = 0.07f))
+                    }
+
+                    if (displayLimit < reversedBars.size) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { displayLimit = (displayLimit + 30).coerceAtMost(reversedBars.size) }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Afficher plus (+${(reversedBars.size - displayLimit).coerceAtMost(30)} entrées)",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }

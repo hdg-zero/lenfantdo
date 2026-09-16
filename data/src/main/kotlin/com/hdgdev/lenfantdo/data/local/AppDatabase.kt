@@ -22,8 +22,8 @@ import com.hdgdev.lenfantdo.data.local.entity.SleepSessionEntity
         SleepSessionEntity::class,
         ActiveTrackingEntity::class
     ],
-    version = 6,
-    exportSchema = false
+    version = 7,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun sleepSessionDao(): SleepSessionDao
@@ -78,6 +78,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_sleep_start_date` ON `sleep` (`start_date`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_sleep_stop_date` ON `sleep` (`stop_date`)")
+                db.execSQL("DROP TABLE IF EXISTS `health_connect_deletion`")
+            }
+        }
+
         fun build(context: Context, inMemory: Boolean = false): AppDatabase {
             val builder = if (inMemory) {
                 Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
@@ -90,7 +98,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_2_3,
                     MIGRATION_3_4,
                     MIGRATION_4_5,
-                    MIGRATION_5_6
+                    MIGRATION_5_6,
+                    MIGRATION_6_7
                 )
                 .build()
         }

@@ -6,23 +6,35 @@
 
 package com.hdgdev.lenfantdo.data.repository
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.hdgdev.lenfantdo.domain.repository.SettingsRepository
 import com.hdgdev.lenfantdo.domain.repository.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
+private val Context.lenfantdoDataStore: DataStore<Preferences> by preferencesDataStore(name = "lenfantdo_preferences")
+
 class SettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>
 ) : SettingsRepository {
 
     companion object {
+        @Volatile
+        private var instance: SettingsRepository? = null
+
+        fun getInstance(context: Context): SettingsRepository {
+            return instance ?: synchronized(this) {
+                instance ?: SettingsRepositoryImpl(context.applicationContext.lenfantdoDataStore).also { instance = it }
+            }
+        }
         val KEY_APP_THEME = stringPreferencesKey("app_theme")
         val KEY_COMPACT_VIEW = booleanPreferencesKey("compact_view")
         val KEY_BEDTIME_HOUR = intPreferencesKey("bedtime_hour")

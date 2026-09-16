@@ -282,7 +282,9 @@ fun ModernSleepBarChart(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val isMonthly = bars.firstOrNull()?.customLabel != null
                 val step = when {
+                    isMonthly -> if (bars.size <= 12) 1 else 2
                     bars.size <= 7 -> 1
                     bars.size <= 14 -> 2
                     bars.size <= 21 -> 3
@@ -308,22 +310,25 @@ fun ModernSleepBarChart(
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+                                val labelText = if (isMonthly) bar.dayOfWeekShort.take(3) else bar.dayOfWeekShort.take(1)
                                 Text(
-                                    text = bar.dayOfWeekShort.take(1),
+                                    text = labelText,
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = 11.sp
+                                        fontSize = if (isMonthly) 10.sp else 11.sp
                                     ),
                                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Text(
-                                    text = "${bar.dayOfMonth}",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 10.sp,
-                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
+                                if (!isMonthly) {
+                                    Text(
+                                        text = "${bar.dayOfMonth}",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = 10.sp,
+                                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
                         }
                     }
@@ -339,8 +344,8 @@ private fun DayInspectionPill(
     meanDurationHours: Double
 ) {
     val fullDateFormatter = remember { DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH) }
-    val formattedDate = remember(bar.date) {
-        bar.date.format(fullDateFormatter).replaceFirstChar { it.uppercase() }
+    val formattedDate = remember(bar.date, bar.customLabel) {
+        bar.customLabel ?: bar.date.format(fullDateFormatter).replaceFirstChar { it.uppercase() }
     }
     val pillShape = RoundedCornerShape(16.dp)
 

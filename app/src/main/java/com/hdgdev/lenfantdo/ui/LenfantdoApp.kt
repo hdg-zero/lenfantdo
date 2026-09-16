@@ -6,6 +6,7 @@
 
 package com.hdgdev.lenfantdo.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -14,6 +15,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,13 +34,22 @@ import com.hdgdev.lenfantdo.feature.privacy.PrivacyScreen
 import com.hdgdev.lenfantdo.feature.review.SessionReviewScreen
 import com.hdgdev.lenfantdo.feature.review.SessionReviewViewModel
 import com.hdgdev.lenfantdo.feature.settings.SettingsScreen
+import com.hdgdev.lenfantdo.feature.settings.SettingsViewModel
 import com.hdgdev.lenfantdo.ui.navigation.BottomNavItems
 import com.hdgdev.lenfantdo.ui.navigation.Screen
 import com.hdgdev.lenfantdo.ui.theme.LenfantdoTheme
 
 @Composable
 fun LenfantdoApp() {
-    LenfantdoTheme {
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val settingsState by settingsViewModel.uiState.collectAsState()
+    val isDarkTheme = when (settingsState.preferences.appTheme) {
+        "dark" -> true
+        "light" -> false
+        else -> isSystemInDarkTheme()
+    }
+
+    LenfantdoTheme(darkTheme = isDarkTheme) {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route

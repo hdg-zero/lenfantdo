@@ -20,10 +20,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class TrackingManager private constructor(
-    private val context: Context,
+class TrackingManager internal constructor(
+    private val context: Context?,
     private val sleepRepository: SleepRepository,
-    private val notificationManager: TrackingNotificationManager) {
+    private val notificationManager: TrackingNotificationManager? = null
+) {
     val repository: SleepRepository get() = sleepRepository
     private val startTrackingUseCase = StartTrackingUseCase(sleepRepository)
     private val stopTrackingUseCase = StopTrackingUseCase(sleepRepository)
@@ -38,7 +39,7 @@ class TrackingManager private constructor(
     suspend fun start(startEpochMs: Long = System.currentTimeMillis()): Result<Unit> {
         val result = startTrackingUseCase(startEpochMs)
         if (result.isSuccess) {
-            notificationManager.showTrackingNotification(startEpochMs)
+            notificationManager?.showTrackingNotification(startEpochMs)
         }
         return result
     }
@@ -51,7 +52,7 @@ class TrackingManager private constructor(
     ): Result<SleepSession> {
         val result = stopTrackingUseCase(stopEpochMs, rating, note, wakeups)
         if (result.isSuccess) {
-            notificationManager.cancelNotification()
+            notificationManager?.cancelNotification()
         }
         return result
     }
@@ -59,7 +60,7 @@ class TrackingManager private constructor(
     suspend fun cancel(): Result<Unit> {
         val result = cancelTrackingUseCase()
         if (result.isSuccess) {
-            notificationManager.cancelNotification()
+            notificationManager?.cancelNotification()
         }
         return result
     }
@@ -68,9 +69,9 @@ class TrackingManager private constructor(
         CoroutineScope(Dispatchers.IO).launch {
             val active = getActiveTracking()
             if (active != null) {
-                notificationManager.showTrackingNotification(active.startEpochMs)
+                notificationManager?.showTrackingNotification(active.startEpochMs)
             } else {
-                notificationManager.cancelNotification()
+                notificationManager?.cancelNotification()
             }
         }
     }
@@ -89,6 +90,10 @@ class TrackingManager private constructor(
                     TrackingManager(appContext, repo, notif).also { instance = it }
                 }
             }
+        }
+
+        fun createForTesting(repository: SleepRepository): TrackingManager {
+            return TrackingManager(null, repository, null)
         }
     }
 }

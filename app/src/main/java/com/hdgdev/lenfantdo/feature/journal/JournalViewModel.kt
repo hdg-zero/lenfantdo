@@ -9,7 +9,10 @@ package com.hdgdev.lenfantdo.feature.journal
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hdgdev.lenfantdo.data.repository.SettingsRepositoryImpl
 import com.hdgdev.lenfantdo.domain.model.SleepSession
+import com.hdgdev.lenfantdo.domain.repository.SettingsRepository
+import com.hdgdev.lenfantdo.domain.repository.SleepRepository
 import com.hdgdev.lenfantdo.domain.usecase.DeleteSleepSessionUseCase
 import com.hdgdev.lenfantdo.domain.usecase.GetSleepHistoryUseCase
 import com.hdgdev.lenfantdo.tracking.TrackingManager
@@ -30,13 +33,16 @@ data class JournalUiState(
     val groupedSessions: Map<String, List<SleepSession>> = emptyMap(),
     val searchQuery: String = "",
     val totalCount: Int = 0,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isCompactView: Boolean = false
 )
 
-class JournalViewModel(application: Application) : AndroidViewModel(application) {
+class JournalViewModel(
+    application: Application,
+    private val repository: SleepRepository = TrackingManager.getInstance(application).repository,
+    private val settingsRepository: SettingsRepository = SettingsRepositoryImpl.getInstance(application)
+) : AndroidViewModel(application) {
 
-    private val trackingManager = TrackingManager.getInstance(application)
-    private val repository = trackingManager.repository
     private val deleteUseCase = DeleteSleepSessionUseCase(repository)
 
     private val _searchQuery = MutableStateFlow("")
@@ -47,8 +53,9 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
 
     val uiState: StateFlow<JournalUiState> = combine(
         repository.observeAllSessions(),
-        _searchQuery
-    ) { allSessions, query ->
+        _searchQuery,
+        settingsRepository.observeSettings()
+    ) { allSessions, query, prefs ->
         val sorted = allSessions.sortedByDescending { it.stopEpochMs }
         val filtered = if (query.isBlank()) {
             sorted
@@ -69,7 +76,8 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
             groupedSessions = grouped,
             searchQuery = query,
             totalCount = allSessions.size,
-            isLoading = false
+            isLoading = false,
+            isCompactView = prefs.compactView
         )
     }.stateIn(
         scope = viewModelScope,

@@ -13,13 +13,18 @@ import com.hdgdev.lenfantdo.domain.assistance.AssistanceEngine
 import com.hdgdev.lenfantdo.domain.assistance.AssistanceWarning
 import com.hdgdev.lenfantdo.domain.model.ActiveTracking
 import com.hdgdev.lenfantdo.domain.model.SleepSession
+import com.hdgdev.lenfantdo.domain.repository.SleepRepository
 import com.hdgdev.lenfantdo.tracking.TrackingManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -31,40 +36,57 @@ data class HomeUiState(
     val totalRecordedNights: Int = 0
 )
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+class HomeViewModel(
+    application: Application,
+    private val trackingManager: TrackingManager = TrackingManager.getInstance(application),
+    private val repository: SleepRepository = trackingManager.repository
+) : AndroidViewModel(application) {
 
-    private val trackingManager = TrackingManager.getInstance(application)
-    private val repository = trackingManager.repository
+    private data class ActiveState(
+        val active: ActiveTracking?,
+        val elapsed: Long,
+        val warning: AssistanceWarning?
+    )
 
-    // Emit a ticker every second when tracking is active
-    private val tickerFlow = flow {
-        while (true) {
-            emit(System.currentTimeMillis())
-            delay(1000L)
+    private val activeStateFlow = trackingManager.observeActiveTracking().flatMapLatest { active ->
+        if (active != null) {
+            flow {
+                while (true) {
+                    val now = System.currentTimeMillis()
+                    val elapsed = ((now - active.startEpochMs) / 1000L).coerceAtLeast(0L)
+                    val warning = AssistanceEngine.inspectActiveTracking(active.startEpochMs, now)
+                    emit(ActiveState(active = active, elapsed = elapsed, warning = warning))
+                    delay(1000L)
+                }
+            }
+        } else {
+            kotlinx.coroutines.flow.flowOf(ActiveState(active = null, elapsed = 0L, warning = null))
         }
     }
 
+    private data class SessionSummary(
+        val lastSession: SleepSession?,
+        val totalCount: Int
+    )
+
+    private val sessionsSummaryFlow = repository.observeAllSessions().map { sessions ->
+        SessionSummary(
+            lastSession = sessions.maxByOrNull { it.stopEpochMs },
+            totalCount = sessions.size
+        )
+    }.distinctUntilChanged()
+
     val uiState: StateFlow<HomeUiState> = combine(
-        trackingManager.observeActiveTracking(),
-        repository.observeAllSessions(),
-        tickerFlow
-    ) { active, allSessions, currentTime ->
-        val elapsed = if (active != null) {
-            ((currentTime - active.startEpochMs) / 1000L).coerceAtLeast(0L)
-        } else 0L
-
-        val warning = if (active != null) {
-            AssistanceEngine.inspectActiveTracking(active.startEpochMs, currentTime)
-        } else null
-
-        val last = allSessions.maxByOrNull { it.stopEpochMs }
-
+        activeStateFlow,
+        sessionsSummaryFlow
+    ) { activeState, sessionsSummary ->
         HomeUiState(
-            activeTracking = active,
-            elapsedSeconds = elapsed,
-            lastSession = last,
-            activeWarning = warning,
-            totalRecordedNights = allSessions.size
+            activeTracking = activeState.active,
+            elapsedSeconds = activeState.elapsed,
+            lastSession = sessionsSummary.lastSession,
+            activeWarning = activeState.warning,
+            totalRecordedNights = sessionsSummary.totalCount
         )
     }.stateIn(
         scope = viewModelScope,

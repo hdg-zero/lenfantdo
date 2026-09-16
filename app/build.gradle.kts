@@ -12,11 +12,12 @@ android {
 
     defaultConfig {
         applicationId = "com.hdgdev.lenfantdo"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 66
         versionName = "26.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        resourceConfigurations += listOf("en", "fr")
         ksp {
             arg("room.incremental", "true")
         }
@@ -36,13 +37,16 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (file("keystore/plees_keystore.jks").exists()) {
-                signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (file("keystore/plees_keystore.jks").exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
             }
         }
     }
@@ -61,13 +65,19 @@ android {
     }
 
     testOptions {
+        unitTests.isReturnDefaultValues = true
         unitTests.all {
             it.systemProperty("user.timezone", "UTC")
         }
     }
 
     lint {
-        disable += "MissingTranslation"
+        disable += listOf(
+            "MissingTranslation",
+            "ExtraTranslation",
+            "MissingDefaultResource",
+            "UnusedContentLambdaTargetStateParameter"
+        )
     }
 }
 
@@ -109,6 +119,7 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.json)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)

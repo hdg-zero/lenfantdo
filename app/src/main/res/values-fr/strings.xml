@@ -29,5 +29,13 @@
     <string name="app_description">Journal de sommeil privé et hors ligne.</string>
     <string name="sleep_id">Session #%s</string>
     <string name="settings">Paramètres</string>
+    <string name="notification_channel_name">Notifications de suivi</string>
+    <string name="notification_channel_description">Rappels pour le coucher et le réveil</string>
+    <string name="bedtime_reminder_title">Rappel du coucher</string>
+    <string name="bedtime_reminder_message">C\'est l\'heure d\'aller au lit. Pensez à lancer le suivi de votre sommeil !</string>
+    <string name="wakeup_reminder_title">Rappel du réveil</string>
+    <string name="wakeup_reminder_message">Bonjour ! N\'oubliez pas d\'arrêter le suivi si ce n\'est pas déjà fait.</string>
+    <string name="default_reminder_title">Rappel sommeil</string>
+    <string name="default_reminder_message">Il est temps pour votre rappel de sommeil.</string>
     <string name="widget_start_stop">Démarrer / Arrêter</string>
 </resources>

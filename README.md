@@ -57,7 +57,7 @@
   └── assistance/          AssistanceEngine (règles déterministes d'anomalies de durée)
 
 :data                      Couche de persistance et de transfert locale (Android Library)
-  ├── local/               Room v6 AppDatabase, DAOs, migrations préservées v1->v6
+  ├── local/               Room v7 AppDatabase, DAOs, migrations préservées v1->v7
   ├── repository/          SleepRepositoryImpl (Room transactions), SettingsRepositoryImpl (DataStore)
   ├── export/              LegacyCsvParser (tolérant aux BOM et virgules), SnapshotManager (SHA-256)
   └── transfer/            EncryptedBackupManager (AES-256-GCM + PBKDF2)
@@ -69,7 +69,7 @@
 
 ### Prérequis
 - JDK 21
-- Android SDK (API 35+)
+- Android SDK (API 26+)
 
 ### Exécuter la suite de tests unitaires
 ```bash
@@ -83,8 +83,8 @@
 
 ### Compiler l'APK et auditer les permissions
 ```bash
-./gradlew assembleDebug
-./tools/audit-release-apk.sh app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleRelease
+./tools/audit-release-apk.sh app/build/outputs/apk/release/app-release.apk
 ```
 
 ---

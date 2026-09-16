@@ -8,11 +8,16 @@ package com.hdgdev.lenfantdo.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.hdgdev.lenfantdo.domain.model.SleepSession
 
 @Entity(
-    tableName = "sleep"
+    tableName = "sleep",
+    indices = [
+        Index(value = ["start_date"]),
+        Index(value = ["stop_date"])
+    ]
 )
 data class SleepSessionEntity(
     @PrimaryKey(autoGenerate = true)

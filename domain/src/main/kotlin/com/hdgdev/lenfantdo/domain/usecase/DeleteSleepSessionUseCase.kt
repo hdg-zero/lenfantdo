@@ -8,6 +8,7 @@ package com.hdgdev.lenfantdo.domain.usecase
 
 import com.hdgdev.lenfantdo.domain.model.SleepSession
 import com.hdgdev.lenfantdo.domain.repository.SleepRepository
+import kotlinx.coroutines.CancellationException
 
 class DeleteSleepSessionUseCase(
     private val sleepRepository: SleepRepository
@@ -17,6 +18,7 @@ class DeleteSleepSessionUseCase(
             sleepRepository.deleteSession(session)
             Result.success(Unit)
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             Result.failure(e)
         }
     }
@@ -26,6 +28,7 @@ class DeleteSleepSessionUseCase(
             sleepRepository.deleteSessionById(id)
             Result.success(Unit)
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             Result.failure(e)
         }
     }

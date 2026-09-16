@@ -121,7 +121,7 @@ fun JournalScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(if (state.isCompactView) 6.dp else 10.dp)
             ) {
                 state.groupedSessions.forEach { (monthHeader, sessionsInMonth) ->
                     item(key = "header_$monthHeader") {
@@ -141,7 +141,8 @@ fun JournalScreen(
                     ) { session ->
                         SleepCard(
                             session = session,
-                            onClick = { onNavigateToDetail(session.id) }
+                            onClick = { onNavigateToDetail(session.id) },
+                            isCompact = state.isCompactView
                         )
                     }
                 }

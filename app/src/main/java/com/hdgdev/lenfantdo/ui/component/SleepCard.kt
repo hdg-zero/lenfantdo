@@ -50,7 +50,8 @@ fun SleepCard(
     session: SleepSession,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    zoneId: ZoneId = ZoneId.systemDefault()
+    zoneId: ZoneId = ZoneId.systemDefault(),
+    isCompact: Boolean = false
 ) {
     val startZDT = remember(session.startEpochMs, zoneId) {
         Instant.ofEpochMilli(session.startEpochMs).atZone(zoneId)
@@ -83,7 +84,7 @@ fun SleepCard(
         if (session.note.isNotBlank()) append("Note : ${session.note}")
     }
 
-    val cardShape = RoundedCornerShape(20.dp)
+    val cardShape = RoundedCornerShape(if (isCompact) 14.dp else 20.dp)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -96,7 +97,7 @@ fun SleepCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(if (isCompact) 10.dp else 16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

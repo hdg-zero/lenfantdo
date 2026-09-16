@@ -67,7 +67,9 @@ object EncryptedBackupManager {
         val keySpec = PBEKeySpec(passphrase, salt, PBKDF2_ITERATIONS, KEY_LENGTH_BITS)
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
         val secretKeyBytes = factory.generateSecret(keySpec).encoded
+        keySpec.clearPassword()
         val secretKey = SecretKeySpec(secretKeyBytes, "AES")
+        java.util.Arrays.fill(secretKeyBytes, 0.toByte())
 
         // 4. Encrypt with AES-GCM
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -114,7 +116,9 @@ object EncryptedBackupManager {
         val keySpec = PBEKeySpec(passphrase, salt, PBKDF2_ITERATIONS, KEY_LENGTH_BITS)
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
         val secretKeyBytes = factory.generateSecret(keySpec).encoded
+        keySpec.clearPassword()
         val secretKey = SecretKeySpec(secretKeyBytes, "AES")
+        java.util.Arrays.fill(secretKeyBytes, 0.toByte())
 
         // 5. Decrypt with AES-GCM
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")

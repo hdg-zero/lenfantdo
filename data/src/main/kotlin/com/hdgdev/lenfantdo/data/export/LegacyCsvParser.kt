@@ -19,20 +19,16 @@ class LegacyCsvParser {
 
     fun parse(reader: Reader): ParseResult {
         val bufferedReader = if (reader is BufferedReader) reader else BufferedReader(reader)
-        val lines = bufferedReader.readLines()
-        if (lines.isEmpty()) return ParseResult(emptyList(), 0)
+        val records = parseCsvRecords(bufferedReader)
+        if (records.isEmpty()) return ParseResult(emptyList(), 0)
 
         val sessions = mutableListOf<SleepSession>()
         var skippedCount = 0
         var headerProcessed = false
         var colMap: Map<String, Int> = emptyMap()
 
-        for (rawLine in lines) {
-            val line = rawLine.trim().removePrefix("\uFEFF")
-            if (line.isBlank()) continue
-
-            val tokens = parseCsvLine(line)
-            if (tokens.isEmpty()) continue
+        for (tokens in records) {
+            if (tokens.isEmpty() || tokens.all { it.isBlank() }) continue
 
             if (!headerProcessed) {
                 if (isHeaderLine(tokens)) {
@@ -63,6 +59,77 @@ class LegacyCsvParser {
         }
 
         return ParseResult(sessions, skippedCount)
+    }
+
+    private fun parseCsvRecords(reader: Reader): List<List<String>> {
+        val records = mutableListOf<List<String>>()
+        val currentRecord = mutableListOf<String>()
+        val currentToken = StringBuilder()
+        var inQuotes = false
+        var isFirstChar = true
+
+        var intChar = reader.read()
+        while (intChar != -1) {
+            var c = intChar.toChar()
+            if (isFirstChar) {
+                isFirstChar = false
+                if (c == '\uFEFF') {
+                    intChar = reader.read()
+                    continue
+                }
+            }
+
+            when {
+                c == '\"' -> {
+                    if (inQuotes) {
+                        // Look ahead for escaped quote
+                        reader.mark(1)
+                        val nextInt = reader.read()
+                        if (nextInt != -1 && nextInt.toChar() == '\"') {
+                            currentToken.append('\"')
+                        } else {
+                            reader.reset()
+                            inQuotes = false
+                        }
+                    } else {
+                        inQuotes = true
+                    }
+                }
+                c == ',' && !inQuotes -> {
+                    currentRecord.add(currentToken.toString().trim())
+                    currentToken.clear()
+                }
+                (c == '\n' || c == '\r') && !inQuotes -> {
+                    // Handle CRLF
+                    if (c == '\r') {
+                        reader.mark(1)
+                        val nextInt = reader.read()
+                        if (nextInt != -1 && nextInt.toChar() != '\n') {
+                            reader.reset()
+                        }
+                    }
+                    currentRecord.add(currentToken.toString().trim())
+                    currentToken.clear()
+                    if (currentRecord.isNotEmpty() && currentRecord.any { it.isNotBlank() }) {
+                        records.add(currentRecord.toList())
+                    }
+                    currentRecord.clear()
+                }
+                else -> {
+                    currentToken.append(c)
+                }
+            }
+            intChar = reader.read()
+        }
+
+        if (currentToken.isNotEmpty() || currentRecord.isNotEmpty()) {
+            currentRecord.add(currentToken.toString().trim())
+            if (currentRecord.any { it.isNotBlank() }) {
+                records.add(currentRecord.toList())
+            }
+        }
+
+        return records
     }
 
     private fun isHeaderLine(tokens: List<String>): Boolean {
@@ -110,34 +177,5 @@ class LegacyCsvParser {
         } catch (_: Exception) {
             return null
         }
-    }
-
-    private fun parseCsvLine(line: String): List<String> {
-        val tokens = mutableListOf<String>()
-        val sb = StringBuilder()
-        var inQuotes = false
-        var i = 0
-
-        while (i < line.length) {
-            val c = line[i]
-            when {
-                c == '\"' -> {
-                    if (inQuotes && i + 1 < line.length && line[i + 1] == '\"') {
-                        sb.append('\"')
-                        i++
-                    } else {
-                        inQuotes = !inQuotes
-                    }
-                }
-                c == ',' && !inQuotes -> {
-                    tokens.add(sb.toString().trim())
-                    sb.clear()
-                }
-                else -> sb.append(c)
-            }
-            i++
-        }
-        tokens.add(sb.toString().trim())
-        return tokens
     }
 }

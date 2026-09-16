@@ -100,4 +100,12 @@ class CsvParserAndSnapshotTest {
         assertEquals(sessions[0].rating, parsedBack.sessions[0].rating)
         assertEquals(sessions[1].rating, parsedBack.sessions[1].rating)
     }
+
+    @Test
+    fun parseQuotedMultilineComment() {
+        val csv = "sid,start,stop,rating,comment,wakes\n1,1625105400000,1625121600000,4,\"Premiere ligne\nDeuxieme ligne\",1\n"
+        val result = parser.parse(StringReader(csv))
+        assertEquals(1, result.sessions.size)
+        assertEquals("Premiere ligne\nDeuxieme ligne", result.sessions[0].note)
+    }
 }

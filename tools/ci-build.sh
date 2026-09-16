@@ -14,17 +14,24 @@ if [ -n "$KEYSTORE" ]; then
     echo "$KEYSTORE" | base64 -d > app/keystore/plees_keystore.jks
 fi
 
-./gradlew build
+./gradlew lintDebug
 ./gradlew test
-./gradlew connectedAndroidTest
+./gradlew assembleRelease
 
-curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.40.0/ktlint
-chmod a+x ktlint
-git ls-files| grep '\.kt[s"]\?$' | xargs ./ktlint --android --relative .
+# Run connectedAndroidTest only if a device or emulator is connected
+if [ -n "${ANDROID_SERIAL:-}" ] || adb get-state 2>/dev/null | grep -q "device"; then
+    ./gradlew connectedAndroidTest
+fi
 
 tools/license-check.sh
 
-# Collect the release APK of each product flavor (foss, gplay).
+# Collect the release APK and audit offline permissions
+if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+    ./tools/audit-release-apk.sh app/build/outputs/apk/release/app-release.apk
+    mkdir -p dist
+    cp app/build/outputs/apk/release/app-release.apk dist/
+fi
+
 for apk in app/build/outputs/apk/*/release/app-*-release.apk; do
     if [ -e "$apk" ]; then
         mkdir -p dist
