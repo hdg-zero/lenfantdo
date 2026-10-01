@@ -14,8 +14,8 @@ android {
         applicationId = "com.hdgdev.lenfantdo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 20260916
-        versionName = "1.0.0"
+        versionCode = 20261001
+        versionName = "1.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ksp {
             arg("room.incremental", "true")
