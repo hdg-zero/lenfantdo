@@ -60,7 +60,7 @@ data class InsightsUiState(
     val totalHoursSlept: Double = 0.0
 )
 
-class InsightsViewModel(
+class InsightsViewModel @JvmOverloads constructor(
     application: Application,
     private val repository: SleepRepository = TrackingManager.getInstance(application).repository
 ) : AndroidViewModel(application) {

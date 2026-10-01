@@ -33,3 +33,8 @@
 -keep class **.R$* {
     <fields>;
 }
+
+# Jetpack Lifecycle & ViewModel reflection instantiation (used by Compose viewModel())
+-keep class com.hdgdev.lenfantdo.feature.**.*ViewModel {
+    <init>(...);
+}

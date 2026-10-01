@@ -37,7 +37,7 @@ data class HomeUiState(
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class HomeViewModel(
+class HomeViewModel @JvmOverloads constructor(
     application: Application,
     private val trackingManager: TrackingManager = TrackingManager.getInstance(application),
     private val repository: SleepRepository = trackingManager.repository

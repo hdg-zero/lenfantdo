@@ -35,7 +35,7 @@ data class SettingsUiState(
     val isBusy: Boolean = false
 )
 
-class SettingsViewModel(
+class SettingsViewModel @JvmOverloads constructor(
     application: Application,
     private val repository: SleepRepository = TrackingManager.getInstance(application).repository,
     private val settingsRepository: SettingsRepository = SettingsRepositoryImpl.getInstance(application)
